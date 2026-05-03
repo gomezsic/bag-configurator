@@ -388,6 +388,13 @@ const EngineDemo: React.FC = () => {
           )}
           {scene && (
             <>
+              {/* Texture debug */}
+              {!dbScene.scene?.selection.fabricTextureUrl && selectedDbFabric && (
+                <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-xs text-yellow-700 dark:text-yellow-400">
+                  ⚠ Il tessuto selezionato non ha texture_url nel DB. Vai su <code>/admin/fabrics</code> e carica un'immagine.
+                </div>
+              )}
+
               <div className="border-t border-border pt-4">
                 <h2 className="text-sm font-medium text-foreground mb-3">Pipeline Layer</h2>
                 <div className="space-y-1">

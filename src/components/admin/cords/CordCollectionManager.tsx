@@ -10,7 +10,7 @@
  * cord_handle_compatibility ed è gestita inline su ogni riga.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { uploadAsset } from '@/lib/uploadAsset';
@@ -54,6 +54,7 @@ interface CordRow {
   style_type: 'texture' | 'pattern_preset';
   texture_url: string | null;
   pattern_preset_id: string | null;
+  preset_json: unknown | null;
   is_active: boolean;
   sort_order: number;
 }
@@ -62,6 +63,60 @@ interface CompatRow {
   cord_id: string;
   handle_id: string;
 }
+
+/** Mini canvas preview for pattern_preset cords. */
+const PatternPreview: React.FC<{ presetJson: unknown }> = ({ presetJson }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    try {
+      const p = presetJson as {
+        stripes?: { color: string; width: number }[];
+        spacing?: number[];
+        edgeMarginLeft?: number;
+        edgeMarginRight?: number;
+      } | null;
+      if (!p?.stripes?.length) return;
+
+      const marginL = p.edgeMarginLeft ?? 0;
+      const marginR = p.edgeMarginRight ?? 0;
+      const spacing = p.spacing ?? [];
+      const totalStripeW = p.stripes.reduce((a, s) => a + s.width, 0);
+      const totalSpacing = spacing.reduce((a, s) => a + s, 0);
+      const available = 1 - marginL - marginR - totalSpacing;
+      const factor = totalStripeW > 0 ? available / totalStripeW : 1;
+
+      // Draw background (edge margin color = first/last stripe color)
+      ctx.fillStyle = '#f0ede8';
+      ctx.fillRect(0, 0, w, h);
+
+      let cursor = marginL;
+      for (let i = 0; i < p.stripes.length; i++) {
+        const s = p.stripes[i];
+        const normW = s.width * factor;
+        const px = Math.round(cursor * w);
+        const pw = Math.max(1, Math.round(normW * w));
+        ctx.fillStyle = s.color;
+        ctx.fillRect(px, 0, pw, h);
+        cursor += normW;
+        if (i < p.stripes.length - 1) cursor += spacing[i] ?? 0;
+      }
+    } catch {
+      /* ignore render errors */
+    }
+  }, [presetJson]);
+
+  return <canvas ref={canvasRef} width={240} height={80} className="w-full h-full" />;
+};
 
 const CordCollectionManager: React.FC = () => {
   const qc = useQueryClient();
@@ -72,10 +127,13 @@ const CordCollectionManager: React.FC = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('cord_collection')
-        .select('id, name, thumbnail_url, style_type, texture_url, pattern_preset_id, is_active, sort_order')
+        .select('id, name, thumbnail_url, style_type, texture_url, pattern_preset_id, is_active, sort_order, handle_pattern_presets(preset_json)')
         .order('sort_order');
       if (error) throw error;
-      return data as CordRow[];
+      return (data ?? []).map((r: Record<string, unknown>) => ({
+        ...r,
+        preset_json: (r.handle_pattern_presets as { preset_json: unknown } | null)?.preset_json ?? null,
+      })) as CordRow[];
     },
   });
 
@@ -209,6 +267,8 @@ const CordCollectionManager: React.FC = () => {
                     alt={c.name}
                     className="w-full h-full object-cover"
                   />
+                ) : c.style_type === 'pattern_preset' && c.preset_json ? (
+                  <PatternPreview presetJson={c.preset_json} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                     <ImageIcon className="h-8 w-8" />

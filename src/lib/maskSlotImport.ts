@@ -102,7 +102,7 @@ export const SLOT_DEFINITIONS: SlotDefinition[] = [
     label: 'Maschera Fettuccine Laterali',
     description: 'Fettuccine/passanti laterali',
     required: false,
-    zoneCategory: 'detail',
+    zoneCategory: 'overlay',
     zoneType: 'side_loops',
     patterns: [
       /mask[_-]?side[_-]?loops?/i,
@@ -116,7 +116,7 @@ export const SLOT_DEFINITIONS: SlotDefinition[] = [
     label: 'Maschera Cerniera',
     description: 'Cerniera/zip (colore variabile)',
     required: false,
-    zoneCategory: 'detail',
+    zoneCategory: 'overlay',
     zoneType: 'zipper',
     patterns: [
       /mask[_-]?zipper/i,
