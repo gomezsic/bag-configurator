@@ -605,19 +605,26 @@ export async function commitAssetPack(
 
   const urls = new Map<string, string>();
   let uploaded = 0;
-  for (const { key, storagePath } of filesToUpload) {
-    onProgress?.({ step: `Upload ${key}`, current: uploaded, total: filesToUpload.length });
-    const blob = result.files.get(key)!;
-    const ct = key.endsWith('.json')
-      ? 'application/json'
-      : key.endsWith('.jpg') || key.endsWith('.jpeg')
-        ? 'image/jpeg'
-        : key.endsWith('.webp')
-          ? 'image/webp'
-          : 'image/png';
-    const url = await uploadBlob(blob, storagePath, ct);
-    urls.set(key, url);
-    uploaded++;
+  const UPLOAD_CONCURRENCY = 5;
+
+  for (let i = 0; i < filesToUpload.length; i += UPLOAD_CONCURRENCY) {
+    const batch = filesToUpload.slice(i, i + UPLOAD_CONCURRENCY);
+    onProgress?.({ step: `Upload ${batch[0].key}`, current: uploaded, total: filesToUpload.length });
+    await Promise.all(
+      batch.map(async ({ key, storagePath }) => {
+        const blob = result.files.get(key)!;
+        const ct = key.endsWith('.json')
+          ? 'application/json'
+          : key.endsWith('.jpg') || key.endsWith('.jpeg')
+            ? 'image/jpeg'
+            : key.endsWith('.webp')
+              ? 'image/webp'
+              : 'image/png';
+        const url = await uploadBlob(blob, storagePath, ct);
+        urls.set(key, url);
+      }),
+    );
+    uploaded += batch.length;
   }
 
   onProgress?.({ step: 'Salvataggio bag model', current: uploaded, total: filesToUpload.length });
