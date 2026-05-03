@@ -1,0 +1,4 @@
+project_id = "bwrbfatfypcxzqnpuwhv"
+
+[functions.analyze-handle-geometry]
+verify_jwt = false
