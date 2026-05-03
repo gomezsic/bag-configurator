@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Trash2, Upload, ImageOff, Save, RotateCcw, Wand2, AlertTriangle, Loader2 } from 'lucide-react';
 import { NewViewWizard } from './NewViewWizard';
+import { MaskGeneratorDialog } from './MaskGeneratorDialog';
 import {
   Select,
   SelectContent,
@@ -75,6 +76,7 @@ export const BagViewsEditor: React.FC<Props> = ({ bagModelId, modelSlug }) => {
   const qc = useQueryClient();
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [maskGenViewId, setMaskGenViewId] = useState<string | null>(null);
   // Local drafts: viewId -> partial edits, applied to the server only on Save
   const [drafts, setDrafts] = useState<Record<string, Partial<BagView>>>({});
 
@@ -336,9 +338,23 @@ export const BagViewsEditor: React.FC<Props> = ({ bagModelId, modelSlug }) => {
                 onUpload={file => handleUpload(v.id, file, 'base_image_url', v.view_type)}
                 onClear={() => updateView.mutate({ id: v.id, base_image_url: null })}
               />
-              <div className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground bg-muted/30 flex items-center justify-center text-center leading-relaxed">
-                Carica solo la <strong className="mx-1">foto neutra</strong> della borsa.<br />
-                Le 3 maschere (ombre, luci, dettagli) vengono generate automaticamente dal pulsante <strong>Genera dalla base</strong>.
+              <div className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground bg-muted/30 flex flex-col items-center justify-center text-center leading-relaxed gap-3">
+                <p>
+                  Carica la <strong>foto neutra</strong> della borsa, poi genera le maschere di zona con AI.
+                </p>
+                <Button
+                  size="sm"
+                  variant="default"
+                  disabled={!v.base_image_url}
+                  onClick={() => setMaskGenViewId(v.id)}
+                  className="gap-1.5 w-full"
+                >
+                  <Wand2 className="h-3.5 w-3.5" />
+                  Genera maschere zone AI
+                </Button>
+                {!v.base_image_url && (
+                  <p className="text-[11px] opacity-70">Carica prima la base image.</p>
+                )}
               </div>
             </div>
 
@@ -463,6 +479,27 @@ export const BagViewsEditor: React.FC<Props> = ({ bagModelId, modelSlug }) => {
         usedViewTypes={views?.map(v => v.view_type) ?? []}
         onCreated={() => qc.invalidateQueries({ queryKey: ['bag-views', bagModelId] })}
       />
+
+      {maskGenViewId && (() => {
+        const view = views?.find(v => v.id === maskGenViewId);
+        if (!view?.base_image_url) return null;
+        return (
+          <MaskGeneratorDialog
+            open={true}
+            onOpenChange={open => { if (!open) setMaskGenViewId(null); }}
+            bagViewId={view.id}
+            bagModelSlug={modelSlug}
+            viewType={view.view_type}
+            canvasWidth={view.canvas_width}
+            canvasHeight={view.canvas_height}
+            baseImageUrl={view.base_image_url}
+            onApplied={() => {
+              setMaskGenViewId(null);
+              qc.invalidateQueries({ queryKey: ['bag-views', bagModelId] });
+            }}
+          />
+        );
+      })()}
     </div>
   );
 };
