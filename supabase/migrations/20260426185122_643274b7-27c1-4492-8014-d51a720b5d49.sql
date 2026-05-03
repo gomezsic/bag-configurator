@@ -46,19 +46,23 @@ UPDATE public.mask_zones SET
   updated_at = now()
 WHERE bag_view_id = '9248f4bd-ad28-4ea1-a437-00815eb623b4';
 
--- 3) Crea una mask_zone dedicata alla cerniera con overlay PRE-COLORATO panna.
---    Categoria 'fabric' così viene disegnata dal layer 'fabric_overlay'.
-INSERT INTO public.mask_zones (
-  bag_view_id, zone_type, zone_category, label,
-  mask_image_url, local_overlay_url,
-  z_index, blend_mode, sort_order,
-  texture_scale, texture_offset_x, texture_offset_y, texture_rotation,
-  texture_repeat_mode, scale_correction_factor, shading_strength
-) VALUES (
-  '9248f4bd-ad28-4ea1-a437-00815eb623b4', 'zip', 'fabric', 'Cerniera',
-  'https://bwrbfatfypcxzqnpuwhv.supabase.co/storage/v1/object/public/admin-assets/slots/City/front-1777225334313/zip_mask-1777229430.png',
-  'https://bwrbfatfypcxzqnpuwhv.supabase.co/storage/v1/object/public/admin-assets/slots/City/front-1777225334313/zip_overlay_panna-1777229453.png',
-  5, 'normal', 10,
-  1.0, 0, 0, 0,
-  'repeat', 1.0, 1.0
-);
+-- 3) Crea una mask_zone dedicata alla cerniera (solo se la view esiste nel db)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.bag_views WHERE id = '9248f4bd-ad28-4ea1-a437-00815eb623b4') THEN
+    INSERT INTO public.mask_zones (
+      bag_view_id, zone_type, zone_category, label,
+      mask_image_url, local_overlay_url,
+      z_index, blend_mode, sort_order,
+      texture_scale, texture_offset_x, texture_offset_y, texture_rotation,
+      texture_repeat_mode, scale_correction_factor, shading_strength
+    ) VALUES (
+      '9248f4bd-ad28-4ea1-a437-00815eb623b4', 'zip', 'fabric', 'Cerniera',
+      'https://bwrbfatfypcxzqnpuwhv.supabase.co/storage/v1/object/public/admin-assets/slots/City/front-1777225334313/zip_mask-1777229430.png',
+      'https://bwrbfatfypcxzqnpuwhv.supabase.co/storage/v1/object/public/admin-assets/slots/City/front-1777225334313/zip_overlay_panna-1777229453.png',
+      5, 'normal', 10,
+      1.0, 0, 0, 0,
+      'repeat', 1.0, 1.0
+    );
+  END IF;
+END $$;
