@@ -176,8 +176,8 @@ Deno.serve(async (req) => {
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY non configurata");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY non configurata");
 
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
@@ -210,17 +210,17 @@ Analizza la borsa nell'immagine e identifica le centerline di:
 Restituisci coordinate ASSOLUTE in pixel rispetto a un canvas ${canvasW}x${canvasH}.
 Usa il tool submit_handle_geometry.`;
 
-    // 3. Chiamata Lovable AI Gateway con tool calling
+    // 3. Chiamata Google Gemini con tool calling
     const aiRes = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${GEMINI_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
+          model: "gemini-2.5-pro",
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             {
@@ -255,8 +255,7 @@ Usa il tool submit_handle_geometry.`;
       if (aiRes.status === 402) {
         return new Response(
           JSON.stringify({
-            error:
-              "Crediti AI esauriti. Aggiungi crediti dalle impostazioni Lovable Cloud.",
+            error: "Quota API Gemini esaurita. Controlla il tuo progetto Google Cloud.",
           }),
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );

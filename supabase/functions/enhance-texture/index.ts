@@ -30,10 +30,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'AI gateway non configurato' }),
+        JSON.stringify({ error: 'GEMINI_API_KEY non configurata' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -122,16 +122,16 @@ Deno.serve(async (req: Request) => {
     let aiResp: Response;
     try {
       aiResp = await fetch(
-        'https://ai.gateway.lovable.dev/v1/chat/completions',
+        'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
         {
           method: 'POST',
           signal: aiController.signal,
           headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            Authorization: `Bearer ${GEMINI_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'google/gemini-3.1-flash-image-preview',
+            model: 'gemini-2.0-flash-preview-image-generation',
             modalities: ['image', 'text'],
             temperature: 0.15,
             max_tokens: 8192,
@@ -162,7 +162,7 @@ Deno.serve(async (req: Request) => {
       }
       if (aiResp.status === 402) {
         return new Response(
-          JSON.stringify({ error: 'Crediti AI esauriti. Aggiungili nelle impostazioni workspace.' }),
+          JSON.stringify({ error: 'Quota API Gemini esaurita. Controlla il tuo progetto Google Cloud.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
