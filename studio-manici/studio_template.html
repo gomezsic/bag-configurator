@@ -88,30 +88,10 @@ kbd{font:.78rem var(--mono);border:1px solid var(--line);border-radius:3px;paddi
 
     <div class="panel">
       <div>
-        <h3>Cosa modifichi</h3>
-        <div class="row"><button class="b" id="mode-man" type="button" aria-pressed="true">Manici</button><button class="b" id="mode-tess" type="button" aria-pressed="false">Verso del tessuto</button></div>
-      </div>
-      <div id="tess-panel" hidden>
-        <h3>Pezzo di tessuto</h3>
-        <div class="seglist" id="pieces"></div>
-        <div class="name" id="tinfo"></div>
-        <label class="t" for="trot" style="margin-top:8px"><span>Direzione</span><span class="status" id="trotv"></span></label>
-        <input type="range" id="trot" min="-180" max="180" step="1" value="0">
-        <div class="row" style="margin-top:6px"><button class="b" id="tm90" type="button">−90°</button><button class="b" id="tp90" type="button">+90°</button><button class="b" id="t0" type="button">Dritto</button></div>
-        <label class="t" for="tsc" style="margin-top:8px"><span>Grandezza della trama</span><span class="status" id="tscv"></span></label>
-        <input type="range" id="tsc" min="0.5" max="2" step="0.05" value="1">
-        <label class="t" for="tdx" style="margin-top:8px"><span>Sposta la trama ↔</span></label>
-        <input type="range" id="tdx" min="0" max="1" step="0.01" value="0">
-        <label class="t" for="tdy"><span>Sposta la trama ↕</span></label>
-        <input type="range" id="tdy" min="0" max="1" step="0.01" value="0">
-        <div class="row" style="margin-top:8px"><button class="b primary" id="tsave" type="button">Salva verso del tessuto</button></div>
-        <div class="status" id="tst" style="margin-top:6px"></div>
-      </div>
-      <div class="man-only">
         <h3>Tratti</h3>
         <div class="seglist" id="segs"></div>
       </div>
-      <div class="man-only">
+      <div>
         <h3>Tratto selezionato</h3>
         <div class="row">
           <button class="b" id="layer" type="button">Davanti</button>
@@ -183,7 +163,7 @@ kbd{font:.78rem var(--mono);border:1px solid var(--line);border-radius:3px;paddi
 
 <script>
 (function(){
-const IMG={pieces:"__PIECES__",neo:"__NEO__",base:"__BASE__",masks:"__MASKS__",tile:"__TILE__",ba:"__BODYA__",bb:"__BODYB__"};
+const IMG={neo:"__NEO__",base:"__BASE__",masks:"__MASKS__",tile:"__TILE__",ba:"__BODYA__",bb:"__BODYB__"};
 const SEED=__SEED__;
 const DOC="percorsi/travel-bag-3q";
 const W=1174,H=1179;
@@ -204,7 +184,7 @@ const seed0=()=>{const s=densify(norm(JSON.parse(JSON.stringify(SEED))));['L','R
 let segs=seed0(),order=Object.keys(segs);
 const FABRICS=[["Neoprene Tortora","#827268","neo"],["Neoprene Burgundy","#680f27","neo"],["Neoprene Petrolio","#1180b0","neo"],["Neoprene Army","#747465","neo"],["Neoprene Blu royal","#1056e5","neo"],["Neoprene Blu scuro","#263b74","neo"],["Dylan 710","#00becc"]];
 const ZIPS=[["Fucsia","#fc1680"],["Bianco","#f2f0ea"],["Nero","#1a1a1a"],["Blu","#1a3fd0"],["Verde","#2c6a3a"],["Ottone","#b08d4a"]];
-const st={mode:'man',piece:'fronte',fab:0,zip:0,sel:order[0],pt:-1,side:0,sample:2,guides:true,clip:true,uv:false,dirty:false};
+const st={fab:0,zip:0,sel:order[0],pt:-1,side:0,sample:2,guides:true,clip:true,uv:false,dirty:false};
 const $=id=>document.getElementById(id);
 
 // ---------- WebGL ----------
@@ -213,12 +193,10 @@ if(!gl){$('st').textContent='WebGL non disponibile su questo dispositivo.';retur
 function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(o);return o;}
 function prog(vs,fs){const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
 const BG=prog(`attribute vec2 p;varying vec2 t;void main(){t=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0,1);}`,
-`precision highp float;varying vec2 t;uniform sampler2D uBase,uMask,uTile,uBodyA,uBodyB,uPiece;uniform vec3 uFab,uZip;uniform float uMul;uniform vec2 uTS;uniform vec4 uP1,uP2,uP3;uniform vec2 uO1,uO2,uO3;
+`precision highp float;varying vec2 t;uniform sampler2D uBase,uMask,uTile,uBodyA,uBodyB;uniform vec3 uFab,uZip;uniform float uMul;uniform vec2 uTS;
 float d16(vec4 q){return (q.r*255.*256.+q.g*255.)/16.;}
 void main(){vec3 base=texture2D(uBase,t).rgb;float Lb=dot(base,vec3(.3333));vec4 m=texture2D(uMask,t);
  vec4 qa=texture2D(uBodyA,t),qb=texture2D(uBodyB,t);vec2 s=vec2(d16(qa),d16(qb));float ao=qa.b,syn=qb.b*255./160.;
- float pc=texture2D(uPiece,t).r*255./60.;vec4 P=uP1;vec2 O=uO1;if(pc>1.5){P=uP2;O=uO2;}if(pc>2.5){P=uP3;O=uO3;}
- s=vec2(P.x*s.x-P.y*s.y,P.y*s.x+P.x*s.y)*P.z+O*uTS;
  float det=texture2D(uTile,s/uTS).r;vec3 alb=uMul>.5?uFab*clamp(det/.64,0.,1.35):uFab*(.62+.76*det);vec3 body=alb*pow(clamp(Lb/.8,0.,1.3),1.7)*syn*.92*(1.-.5*ao);
  vec3 c=mix(base,body,m.g);c=mix(c,uZip*pow(clamp(Lb/.82,0.,1.3),1.4),m.b);gl_FragColor=vec4(c,1.);}`);
 const RB=prog(`attribute vec2 p;attribute vec3 a;varying vec3 v;void main(){v=a;gl_Position=vec4(p.x/${W}.*2.-1.,1.-p.y/${H}.*2.,0,1);}`,
@@ -294,12 +272,10 @@ let ready=false,tileKind='';const IMS={};const hx=h=>[1,3,5].map(i=>parseInt(h.s
 function draw(){if(!ready)return;
  gl.viewport(0,0,W,H);gl.disable(gl.BLEND);gl.useProgram(BG);
  gl.bindBuffer(gl.ARRAY_BUFFER,quad);const lp=gl.getAttribLocation(BG,'p');gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
- [['uBase',0],['uMask',1],['uTile',2],['uBodyA',3],['uBodyB',4],['uPiece',6]].forEach(([n,u])=>gl.uniform1i(gl.getUniformLocation(BG,n),u));
- PKEYS.forEach((k,i)=>{const q=TESS[k],a=q.rot*Math.PI/180;gl.uniform4f(gl.getUniformLocation(BG,'uP'+(i+1)),Math.cos(a),Math.sin(a),1/q.scale,0);gl.uniform2f(gl.getUniformLocation(BG,'uO'+(i+1)),q.dx,q.dy);});
+ [['uBase',0],['uMask',1],['uTile',2],['uBodyA',3],['uBodyB',4]].forEach(([n,u])=>gl.uniform1i(gl.getUniformLocation(BG,n),u));
  const F=FABRICS[st.fab],neo=F[2]==='neo';
  if(tileKind!==(neo?'neo':'dyl')){tileKind=neo?'neo':'dyl';gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,TX.tile);
-  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,neo?IMS.neo:IMS.tile);gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
-  const AN=gl.getExtension('EXT_texture_filter_anisotropic')||gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');if(AN)gl.texParameterf(gl.TEXTURE_2D,AN.TEXTURE_MAX_ANISOTROPY_EXT,Math.min(8,gl.getParameter(AN.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));}
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,neo?IMS.neo:IMS.tile);gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);}
  gl.uniform1f(gl.getUniformLocation(BG,'uMul'),neo?1:0);gl.uniform2fv(gl.getUniformLocation(BG,'uTS'),neo?[63.8,69.3]:[160,160]);
  gl.uniform3fv(gl.getUniformLocation(BG,'uFab'),hx(F[1]));gl.uniform3fv(gl.getUniformLocation(BG,'uZip'),hx(ZIPS[st.zip][1]));
  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);gl.disableVertexAttribArray(lp);
@@ -317,7 +293,7 @@ function draw(){if(!ready)return;
 const ov=$('ov');const NS='http://www.w3.org/2000/svg';
 function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
 function pathD(pts){return 'M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L');}
-function overlay(){ov.innerHTML='';if(st.mode==='tess'){tessOverlay();return;}if(!st.guides)return;
+function overlay(){ov.innerHTML='';if(!st.guides)return;
  const defs=el('defs',{});order.forEach((k,i)=>{const m=el('marker',{id:'ar'+i,viewBox:'0 0 10 10',refX:'6',refY:'5',markerWidth:'5',markerHeight:'5',orient:'auto-start-reverse'});
   m.appendChild(el('path',{d:'M0 0 L10 5 L0 10 z',fill:SEGCOL[i%SEGCOL.length]}));defs.appendChild(m);});ov.appendChild(defs);
  order.forEach((k,i)=>{const seg=segs[k],S=sample(seg,16),col=SEGCOL[i%SEGCOL.length],on=k===st.sel;
@@ -425,51 +401,9 @@ $('save').onclick=()=>{clearTimeout(saveTimer);save();};
 $('copy').onclick=async()=>{const txt=JSON.stringify({order,segments:segs});try{await navigator.clipboard.writeText(txt);status('Dati copiati negli appunti.','ok');}catch(e){status('Copia non riuscita in questa vista.','warn');}};
 $('reset').onclick=()=>{segs=seed0();order=Object.keys(segs);st.sel=order[0];st.pt=-1;markDirty();sync();status('Ripristinata la proposta automatica: correggila e salva.','warn');};
 
-
-// ---------- verso del tessuto ----------
-const PIECES={"fronte": {"id": 1, "nome": "Corpo davanti", "x": 643, "y": 729, "J": [[1.0808, -0.1441], [-0.1108, -0.9975]]}, "sopra": {"id": 2, "nome": "Fascia sopra", "x": 564, "y": 523, "J": [[0.7565, -1.0808], [-0.7695, -4.0812]]}, "fianco": {"id": 3, "nome": "Fianco", "x": 276, "y": 791, "J": [[1.08, 0.0], [0.0, -1.0]]}};const PKEYS=Object.keys(PIECES);const TDOC='tessuto/travel-bag-3q';
-const TESS={};PKEYS.forEach(k=>TESS[k]={rot:k==='fianco'?90:0,scale:1,dx:0,dy:0});
-const PCOL={fronte:'#ff7a00',sopra:'#2bb673',fianco:'#00a6ff'};
-function pdir(k,deg){const J=PIECES[k].J,a=deg*Math.PI/180,u=[Math.sin(a),Math.cos(a)];const d=J[0][0]*J[1][1]-J[0][1]*J[1][0];
- const w=[(J[1][1]*u[0]-J[0][1]*u[1])/d,(-J[1][0]*u[0]+J[0][0]*u[1])/d];const n=Math.hypot(w[0],w[1])||1;return [w[0]/n,w[1]/n];}
-function tessOverlay(){const L=90;
- PKEYS.forEach(k=>{const P=PIECES[k],q=TESS[k],on=k===st.piece,col=PCOL[k]||'#ff7a00';const g=el('g',{opacity:on?1:.6});
-  const [dx,dy]=pdir(k,q.rot),[px,py]=pdir(k,q.rot+90);const tx=P.x+dx*L,ty=P.y+dy*L;
-  g.appendChild(el('line',{x1:P.x-px*30,y1:P.y-py*30,x2:P.x+px*30,y2:P.y+py*30,stroke:col,'stroke-width':on?2:1.5,'stroke-dasharray':'4 3'}));
-  g.appendChild(el('line',{x1:P.x,y1:P.y,x2:tx,y2:ty,stroke:'#fff','stroke-width':on?6:4,'stroke-linecap':'round'}));
-  g.appendChild(el('line',{x1:P.x,y1:P.y,x2:tx,y2:ty,stroke:col,'stroke-width':on?3:2}));
-  const hd=12;g.appendChild(el('polygon',{points:`${tx+dx*hd},${ty+dy*hd} ${tx-px*hd*.6},${ty-py*hd*.6} ${tx+px*hd*.6},${ty+py*hd*.6}`,fill:col,stroke:'#fff','stroke-width':1.5}));
-  const c=el('circle',{cx:P.x,cy:P.y,r:on?9:7,fill:col,stroke:'#fff','stroke-width':2.5});c.style.cursor='pointer';c.addEventListener('pointerdown',e=>{e.preventDefault();st.piece=k;tsync();});g.appendChild(c);
-  const tip=el('circle',{cx:tx+dx*hd,cy:ty+dy*hd,r:on?10:8,fill:'#fff',stroke:col,'stroke-width':3});tip.style.cursor='grab';
-  tip.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();st.piece=k;tdrag=k;ov.setPointerCapture(e.pointerId);tsync();});g.appendChild(tip);
-  const lab=el('text',{x:P.x+12,y:P.y-12,fill:'#fff',stroke:'#000','stroke-width':3,'paint-order':'stroke','font-size':18,'font-family':'sans-serif','font-weight':600});lab.textContent=P.nome;g.appendChild(lab);
-  ov.appendChild(g);});}
-let tdrag=null;
-ov.addEventListener('pointermove',ev=>{if(!tdrag)return;const p=svgPt(ev),P=PIECES[tdrag],J=P.J;const w=[p.x-P.x,p.y-P.y];if(Math.hypot(w[0],w[1])<8)return;
- const u=[J[0][0]*w[0]+J[0][1]*w[1],J[1][0]*w[0]+J[1][1]*w[1]];let a=Math.atan2(u[0],u[1])*180/Math.PI;a=Math.round(a/(ev.shiftKey?15:1))*(ev.shiftKey?15:1);
- TESS[tdrag].rot=a;tsync(true);});
-ov.addEventListener('pointerup',()=>{if(tdrag){tdrag=null;tDirty();}});
-function tsync(light){const q=TESS[st.piece];
- $('pieces').innerHTML='';PKEYS.forEach(k=>{const b=document.createElement('button');b.type='button';b.className='seg';b.setAttribute('aria-pressed',k===st.piece);
-  b.innerHTML=`<span class="dot" style="background:${PCOL[k]}"></span>${PIECES[k].nome}<span class="tag">${Math.round(TESS[k].rot)}° · ${Math.round(TESS[k].scale*100)}%</span>`;b.onclick=()=>{st.piece=k;tsync();};$('pieces').appendChild(b);});
- $('trot').value=q.rot;$('trotv').textContent=Math.round(q.rot)+'°';$('tsc').value=q.scale;$('tscv').textContent=Math.round(q.scale*100)+'%';$('tdx').value=q.dx;$('tdy').value=q.dy;
- $('tinfo').textContent='Trascina la punta della freccia per girare la trama (Maiusc: a scatti di 15°). La freccia indica il verso del tessuto, la linea tratteggiata la trama di traverso.';
- overlay();draw();}
-const tset=(f,v)=>{TESS[st.piece][f]=v;tsync(true);};
-$('trot').oninput=e=>tset('rot',+e.target.value);$('tsc').oninput=e=>tset('scale',+e.target.value);$('tdx').oninput=e=>tset('dx',+e.target.value);$('tdy').oninput=e=>tset('dy',+e.target.value);
-['trot','tsc','tdx','tdy'].forEach(id=>$(id).onchange=tDirty);
-const norm180=a=>((a+180)%360+360)%360-180;
-$('tm90').onclick=()=>{tset('rot',norm180(TESS[st.piece].rot-90));tDirty();};$('tp90').onclick=()=>{tset('rot',norm180(TESS[st.piece].rot+90));tDirty();};$('t0').onclick=()=>{tset('rot',0);tDirty();};
-function tstat(t,c){const e=$('tst');e.textContent=t;e.className='status'+(c?' '+c:'');}
-let tTimer=null;function tDirty(){tstat(db?'Modifiche in salvataggio…':'Modifiche non salvate (salvataggio non disponibile in questa vista).','warn');clearTimeout(tTimer);if(db)tTimer=setTimeout(tSave,1200);}
-async function tSave(){if(!db)return;try{await db.doc(TDOC).set({bag:'travel-bag',view:'3q',pezzi:TESS,savedAt:new Date().toISOString()});tstat('Salvato alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),'ok');}catch(e){tstat('Non salvato ('+(e&&e.code||'errore')+').','warn');}}
-$('tsave').onclick=()=>{clearTimeout(tTimer);tSave();};
-function setMode(m){st.mode=m;$('mode-man').setAttribute('aria-pressed',m==='man');$('mode-tess').setAttribute('aria-pressed',m==='tess');$('tess-panel').hidden=m!=='tess';
- document.querySelectorAll('.man-only').forEach(e=>e.hidden=m==='tess');if(m==='tess')tsync();else sync();}
-$('mode-man').onclick=()=>setMode('man');$('mode-tess').onclick=()=>setMode('tess');
 // ---------- avvio ----------
 function load(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
-Promise.all(['base','masks','tile','ba','bb','neo','pieces'].map(k=>load(IMG[k]))).then(([b,m,t,ba,bb,nn,pc])=>{TX.pc=mk(6,pc,{n:true});
+Promise.all(['base','masks','tile','ba','bb','neo'].map(k=>load(IMG[k]))).then(([b,m,t,ba,bb,nn])=>{
  IMS.tile=t;IMS.neo=nn;TX.base=mk(0,b,{});TX.mask=mk(1,m,{});TX.tile=mk(2,t,{r:true});TX.ba=mk(3,ba,{n:true});TX.bb=mk(4,bb,{n:true});TX.bands=mk(5,bc,{});
  ready=true;sync();});
 sync();
@@ -478,7 +412,6 @@ status('Proposta automatica caricata. Correggila e salva.');
  if(!db){status('Salvataggio non disponibile in questa vista: usa "Copia dati".','warn');bstat('Salvataggio non disponibile in questa vista: usa "Copia dati".','warn');return;}
  try{const rs=await db.doc(RDOC).get();if(rs.exists){const d=rs.data();if(d&&Array.isArray(d.list)&&d.list.length){SAMPLES=d.list.map(x=>[x.name,x.bands.map(b=>[b.c,b.w])]);st.sample=Math.min(st.sample,SAMPLES.length-1);renderSamples();sync();bstat('Manici salvati caricati.','ok');}}
   else bstat('Manici campione dalle tue scansioni: correggili e premi "Salva manici".');}catch(e){bstat('Non riesco a leggere i manici salvati ('+(e&&e.code||'errore')+').','warn');}
- try{const ts=await db.doc(TDOC).get();if(ts.exists){const d=ts.data();if(d&&d.pezzi)PKEYS.forEach(k=>{if(d.pezzi[k])Object.assign(TESS[k],d.pezzi[k]);});tstat('Verso del tessuto salvato caricato.','ok');draw();if(st.mode==='tess')tsync();}}catch(e){}
  try{const snap=await db.doc(DOC).get();if(snap.exists){const d=snap.data();if(d&&d.segments){segs=densify(norm(JSON.parse(JSON.stringify(d.segments))));order=(d.order||Object.keys(segs)).filter(k=>segs[k]);st.sel=order[0];st.pt=-1;sync();
    status('Percorsi salvati caricati ('+(d.savedAt?new Date(d.savedAt).toLocaleString('it-IT'):'')+').','ok');}}
   else status('Proposta automatica: correggila e premi "Salva percorsi".');}
