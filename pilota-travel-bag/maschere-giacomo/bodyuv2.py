@@ -78,11 +78,15 @@ dx=xx-cx;dy=yy-cy
 ex=(dx*ax_minor[0]+dy*ax_minor[1])/a_;ey=(dx*ax_major[0]+dy*ax_major[1])/b_
 if ax_major[1]<0:ey=-ey
 r=np.sqrt(ex**2+ey**2)
-# fianco: disco di raggio reale uguale al corpo (Rpx), stessa scala del fronte (1,25 unità per pixel di raggio), trama girata di 90°
-shc=1.18*(0.74+0.20*np.sqrt(np.clip(1-r**2,0,1)))*(0.95-0.12*ey)
-print('fianco centro',round(cx),round(cy),'semiassi',round(a_),round(b_))
-# lo scorcio vero schiaccerebbe la trama di 3,4 volte e la farebbe sembrare un altro tessuto: la teniamo con la stessa densità a schermo del fronte
-Uc=ey*Rpx*1.25*0.89+3000;Vc=ex*Rpx*1.25*0.36*0.89+3000
+# fianco: stessa trama del fronte, proiettata piatta con la stessa densità a schermo del fronte (U≈1,08·x, V≈−y).
+# Il verso si gira nello Studio (editor del tessuto); la luce è quella media del fronte, le ombre vengono dalla foto.
+Uc=xx*1.08+3000.;Vc=-yy*1.0+3000.
+# compensa la foto: il fianco nella foto neutra è più in ombra, qui lo portiamo alla stessa luce media del fronte
+Lb=np.array(Image.open('a_base.jpg').convert('RGB')).astype(np.float32).mean(2)/255
+lt=np.clip(Lb/.8,0,1.3)**1.7
+k=np.median((lt*shw)[fr>0.5])/max(np.median(lt[fi>0.5]),1e-3)
+shc=np.full((H,W),k)
+print('fianco centro',round(cx),round(cy))
 body=np.clip(np.maximum(np.maximum(fr,so),fi),0,1)
 # chiudi le fessure di 1-3 px tra un pezzo e l'altro
 closed=ndimage.grey_closing(body,size=(7,7))

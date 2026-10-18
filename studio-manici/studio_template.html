@@ -427,8 +427,8 @@ $('reset').onclick=()=>{segs=seed0();order=Object.keys(segs);st.sel=order[0];st.
 
 
 // ---------- verso del tessuto ----------
-const PIECES={"fronte": {"id": 1, "nome": "Corpo davanti", "x": 643, "y": 729, "J": [[1.0808, -0.1441], [-0.1108, -0.9975]]}, "sopra": {"id": 2, "nome": "Fascia sopra", "x": 564, "y": 523, "J": [[0.7565, -1.0808], [-0.7695, -4.0812]]}, "fianco": {"id": 3, "nome": "Fianco", "x": 276, "y": 791, "J": [[0.0705, 1.0619], [-1.1021, 0.0732]]}};const PKEYS=Object.keys(PIECES);const TDOC='tessuto/travel-bag-3q';
-const TESS={};PKEYS.forEach(k=>TESS[k]={rot:0,scale:1,dx:0,dy:0});
+const PIECES={"fronte": {"id": 1, "nome": "Corpo davanti", "x": 643, "y": 729, "J": [[1.0808, -0.1441], [-0.1108, -0.9975]]}, "sopra": {"id": 2, "nome": "Fascia sopra", "x": 564, "y": 523, "J": [[0.7565, -1.0808], [-0.7695, -4.0812]]}, "fianco": {"id": 3, "nome": "Fianco", "x": 276, "y": 791, "J": [[1.08, 0.0], [0.0, -1.0]]}};const PKEYS=Object.keys(PIECES);const TDOC='tessuto/travel-bag-3q';
+const TESS={};PKEYS.forEach(k=>TESS[k]={rot:k==='fianco'?90:0,scale:1,dx:0,dy:0});
 const PCOL={fronte:'#ff7a00',sopra:'#2bb673',fianco:'#00a6ff'};
 function pdir(k,deg){const J=PIECES[k].J,a=deg*Math.PI/180,u=[Math.sin(a),Math.cos(a)];const d=J[0][0]*J[1][1]-J[0][1]*J[1][0];
  const w=[(J[1][1]*u[0]-J[0][1]*u[1])/d,(-J[1][0]*u[0]+J[0][0]*u[1])/d];const n=Math.hypot(w[0],w[1])||1;return [w[0]/n,w[1]/n];}
