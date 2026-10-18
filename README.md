@@ -11,6 +11,7 @@ La vecchia app Lovable è archiviata nel ramo `archivio-lovable`.
   - `studio_seed.json`: la proposta automatica di partenza dei tratti.
   - `nastri-campione.json`: le bande (colore e % di larghezza) dei manici ricavate dalle scansioni con `bands.py`.
   - `neo_tile512.png`: la trama del neoprene ripetibile.
+- `archivio/archivio.html`: l'Archivio con i moduli guidati di modelli, tessuti, manici, abbinamenti, collezioni e ricamo (online: https://claude.ai/artifact/Sd4DdXc8hdsXZpyQJzZmVg). I dati stanno nel database dell'artifact (raccolte `modelli`, `tessuti`, `manici`, `collezioni`, documenti `abbinamenti/matrice` e `impostazioni/ricamo`).
 - `pilota-travel-bag/`: le mappe, le immagini e gli script della Travel Bag 3/4 (`script/`: `stmap.py`, `bodyuv.py`, `prep.py`, `build.py`).
 - `tessuti/neoprene/`: la trama neutra originale, quella ripetibile e la prova di colorazione.
 

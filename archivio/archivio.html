@@ -1,0 +1,775 @@
+<title>Archivio QG Bags</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Questrial&family=Cinzel:wght@500;700&family=Pinyon+Script&display=swap">
+<style>
+/* Layout: archivio a schede. Elenco a sinistra, modulo guidato a destra, stesso linguaggio dello Studio */
+:root{
+  --bg:#f2f3f6; --surface:#ffffff; --fg:#141a2b; --muted:#5a6275; --line:#d6d9e2;
+  --accent:#1b3f99; --accent-soft:#e3e9f8; --ok:#1f7a4d; --ok-soft:#e1f2e8; --warn:#a2611a; --warn-soft:#f8ecdc; --bad:#a8243a; --bad-soft:#f7e1e5;
+  --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --body:"Instrument Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f131d; --surface:#171c29; --fg:#e8ebf3; --muted:#9aa2b6; --line:#2a3142;
+  --accent:#8fb0ff; --accent-soft:#1d2842; --ok:#6fd3a0; --ok-soft:#15302a; --warn:#e6a85c; --warn-soft:#33281a; --bad:#f08a9a; --bad-soft:#3a1d25; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f131d; --surface:#171c29; --fg:#e8ebf3; --muted:#9aa2b6; --line:#2a3142;
+  --accent:#8fb0ff; --accent-soft:#1d2842; --ok:#6fd3a0; --ok-soft:#15302a; --warn:#e6a85c; --warn-soft:#33281a; --bad:#f08a9a; --bad-soft:#3a1d25; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font:700 clamp(1.6rem,3.4vw,2.2rem)/1.1 var(--display);margin:0;text-wrap:balance}
+h2{font:700 1.25rem/1.2 var(--display);margin:0;text-wrap:balance}
+.eyebrow{font:500 .72rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+p{margin:0;max-width:75ch}
+.muted{color:var(--muted)}
+.small{font-size:.84rem}
+.mono{font-family:var(--mono)}
+.head{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+.counts{display:flex;flex-wrap:wrap;gap:8px}
+.count{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 10px;font-size:.84rem;font-variant-numeric:tabular-nums}
+.count b{font:700 1rem var(--display);margin-right:4px}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{border:0;background:none;color:var(--muted);font:600 .92rem var(--body);padding:10px 14px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+nav.tabs button .n{font:500 .7rem var(--mono);color:var(--muted);margin-left:4px}
+.notice{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:10px 12px;font-size:.88rem}
+.notice.warn{border-color:var(--warn);background:var(--warn-soft)}
+.lab{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.lab{grid-template-columns:1fr}}
+.list{display:flex;flex-direction:column;gap:6px;min-width:0}
+.item{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--surface);color:var(--fg);cursor:pointer;text-align:left;width:100%;font:inherit}
+.item[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.item .t{font-weight:600;font-size:.92rem;line-height:1.25}
+.item .s{font-size:.76rem;color:var(--muted)}
+.item .grow{flex:1;min-width:0}
+.item canvas,.item .thumb{flex:none;border-radius:3px}
+.bar{height:4px;border-radius:2px;background:var(--line);overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.bar i.full{background:var(--ok)}
+.pill{display:inline-flex;align-items:center;gap:4px;font:500 .68rem/1 var(--mono);letter-spacing:.04em;text-transform:uppercase;border-radius:20px;padding:4px 7px;white-space:nowrap;border:1px solid transparent}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.off{border-color:var(--line);color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:22px;min-width:0}
+.empty{padding:28px 18px;text-align:center;color:var(--muted)}
+.step{display:flex;flex-direction:column;gap:12px;min-width:0}
+.step>h3{display:flex;align-items:center;gap:10px;margin:0;font:700 1rem var(--display)}
+.step>h3 .num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--surface);font:500 .75rem/24px var(--mono);text-align:center;flex:none}
+.step>h3 .num.ok{background:var(--ok)}
+.step>h3 .aside{margin-left:auto;font:500 .72rem var(--mono);color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px 14px}
+.grid .wide{grid-column:1/-1}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f>span{font-size:.78rem;color:var(--muted);font-weight:500}
+input.i,select.i,textarea.i{border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--fg);padding:7px 9px;font:.92rem var(--body);width:100%;min-width:0}
+textarea.i{min-height:70px;resize:vertical}
+input.i:focus-visible,select.i:focus-visible,textarea.i:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+input[type=color]{width:44px;height:34px;border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:2px;flex:none;cursor:pointer}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row.nowrap{flex-wrap:nowrap}
+button.b{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:4px;padding:7px 11px;font:500 .84rem var(--body);cursor:pointer;white-space:nowrap}
+button.b:hover{border-color:var(--accent)}
+button.b.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button.b.danger{color:var(--bad)}
+button.b.danger.arm{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+button.b:disabled{opacity:.5;cursor:not-allowed}
+button.b.sm{padding:4px 8px;font-size:.78rem}
+.tog{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.92rem}
+.tog input{width:18px;height:18px;accent-color:var(--accent)}
+.status{font:.76rem var(--mono);color:var(--muted)}
+.status.ok{color:var(--ok)} .status.warn{color:var(--warn)} .status.bad{color:var(--bad)}
+.spec{font-size:.8rem;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}
+.spec b{color:var(--fg);font-weight:600}
+/* file slots */
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.slot{border:1px dashed var(--line);border-radius:6px;padding:10px;display:flex;gap:10px;align-items:flex-start;background:var(--bg);min-width:0}
+.slot.has{border-style:solid}
+.slot.req:not(.has){border-color:var(--warn)}
+.slot .pv{width:64px;height:64px;flex:none;border-radius:4px;background:repeating-conic-gradient(var(--line) 0 25%,transparent 0 50%) 0 0/12px 12px;display:grid;place-items:center;overflow:hidden;color:var(--muted);font:500 .65rem var(--mono)}
+.slot .pv img{width:100%;height:100%;object-fit:contain}
+.slot .meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.slot .nm{font-weight:600;font-size:.86rem;line-height:1.25}
+.slot .ky{font:500 .7rem var(--mono);color:var(--muted);word-break:break-all}
+.slot .msg{font-size:.76rem;line-height:1.3}
+.slot .msg.ok{color:var(--ok)} .slot .msg.warn{color:var(--warn)} .slot .msg.bad{color:var(--bad)}
+.slot input[type=file]{display:none}
+.todo{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none;font-size:.88rem}
+.todo li{display:flex;gap:8px;align-items:baseline}
+.todo li::before{content:"";width:9px;height:9px;border-radius:50%;flex:none;background:var(--warn);transform:translateY(1px)}
+.todo li.ok::before{background:var(--ok)}
+.todo li.ok{color:var(--muted)}
+/* tables of rows */
+.rows{display:flex;flex-direction:column;gap:6px}
+.r{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.r .i{flex:1 1 140px}
+.r .i.n{flex:0 0 100px}
+.strip{display:flex;height:42px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.strip div{height:100%}
+/* matrix */
+.mx{overflow:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface);max-height:72vh}
+.mx table{border-collapse:separate;border-spacing:0;font-size:.82rem}
+.mx th,.mx td{border-bottom:1px solid var(--line);padding:0;background:var(--surface)}
+.mx thead th{position:sticky;top:0;z-index:2;vertical-align:bottom;padding:8px 4px;font:500 .72rem var(--mono);min-width:44px}
+.mx thead th .hs{width:26px;height:44px;margin:0 auto 4px;border-radius:2px;display:flex;overflow:hidden;border:1px solid var(--line)}
+.mx thead th .hs i{flex:1 0 auto;height:100%}
+.mx thead th .zd{display:block;width:10px;height:10px;border-radius:50%;margin:3px auto 0;border:1px solid var(--line)}
+.mx .rh{position:sticky;left:0;z-index:1;text-align:left;padding:6px 10px;min-width:210px;border-right:1px solid var(--line)}
+.mx thead .rh{z-index:3}
+.mx .rh .row{gap:8px;flex-wrap:nowrap}
+.mx .rh .sq{width:22px;height:22px;border-radius:3px;flex:none;border:1px solid var(--line)}
+.mx .fam td,.mx .fam th{background:var(--bg);font:600 .74rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 10px}
+.mx td.c{text-align:center}
+.mx td.c button{width:40px;height:34px;border:0;background:none;cursor:pointer;color:var(--fg);font-size:1rem}
+.mx td.c button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.mx td.c button:hover{outline:1px solid var(--accent);outline-offset:-3px}
+.mx td.st{padding:4px 10px;white-space:nowrap}
+/* collections */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.card{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left;color:var(--fg);font:inherit}
+.card[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.card canvas{width:100%;height:auto;aspect-ratio:4/3;border-radius:4px;background:var(--bg)}
+.card .t{font-weight:600}
+/* embroidery */
+.emb{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+@media (max-width:860px){.emb{grid-template-columns:1fr}}
+.emb canvas{width:100%;height:auto;border-radius:6px;border:1px solid var(--line);background:var(--bg);display:block}
+.fonts{display:flex;flex-wrap:wrap;gap:6px}
+.fonts button{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:4px;padding:6px 12px;cursor:pointer;font-size:1.15rem}
+.fonts button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.price{font:700 1.4rem var(--display);font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <div class="eyebrow">QG Bags · configuratore</div>
+      <h1>Archivio di modelli, tessuti e manici</h1>
+      <p class="muted" style="margin-top:6px">Qui inserisci tutto quello che serve al configuratore. Ogni modulo ti dice quali file caricare e se sono giusti; i punti arancioni sono quelli che mancano.</p>
+    </div>
+    <div class="counts" id="counts" aria-live="polite"></div>
+  </header>
+  <div class="notice warn" id="offline" hidden></div>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <main id="view"></main>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur=v=>(v===''||v==null||isNaN(+v))?'da definire':(+v).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
+const uid=p=>p+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const slug=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+const clone=o=>JSON.parse(JSON.stringify(o??null));
+const getP=(o,p)=>p.split('.').reduce((a,k)=>a==null?a:a[k],o);
+const setP=(o,p,v)=>{const ks=p.split('.');let a=o;ks.slice(0,-1).forEach(k=>{if(a[k]==null||typeof a[k]!=='object')a[k]={};a=a[k];});a[ks[ks.length-1]]=v;};
+const blob=id=>'/_blob/'+id;
+const hm=()=>new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+
+// ---------- standard (uguali alla guida) ----------
+const STD={foto:2400,tess:2362,man:2953};
+const LAYERS=[
+ {k:'corpo_fronte',l:'Corpo, faccia davanti',req:1},
+ {k:'corpo_sopra',l:'Corpo, parte sopra'},
+ {k:'corpo_retro',l:'Corpo, faccia dietro'},
+ {k:'fianco_sx',l:'Fianco sinistro'},
+ {k:'fianco_dx',l:'Fianco destro'},
+ {k:'fondo',l:'Fondo (solo se di altro materiale)'},
+ {k:'manico_davanti',l:'Manico davanti',req:1},
+ {k:'manico_dietro',l:'Manico dietro'},
+ {k:'tracolla',l:'Tracolla'},
+ {k:'linguetta_sx',l:'Linguetta sinistra'},
+ {k:'linguetta_dx',l:'Linguetta destra'},
+ {k:'zip',l:'Nastro della zip',req:1},
+ {k:'metalli',l:'Metalli (bronzo vero, sopra a tutto)'},
+ {k:'ricamo',l:'Zona del ricamo',ric:1},
+ {k:'ombra_terra',l:'Ombra sul fondo bianco'},
+];
+const ETICHETTE=['Più venduto','Preferito','Novità','Collezione'];
+const TIPI_TESSUTO=['Neoprene','Cotone','Tramé','Velluto','Velluto stampato','Tela','Ecopelle'];
+
+// ---------- stato ----------
+const S={modelli:{},tessuti:{},manici:{},collezioni:{},matrice:{righe:{}},ricamo:null};
+const RIC_DEF={prezzo:'',altezzaMin:0.8,altezzaMax:3,font:[]};
+const UI={tab:'modelli',sel:{},view:{},dirty:{},timers:{},arm:null};
+let db=null,assets=null,user=null,canWrite=true,loaded=false;
+
+const TABS=[['modelli','Modelli'],['tessuti','Tessuti'],['manici','Manici'],['abbinamenti','Abbinamenti'],['collezioni','Collezioni'],['ricamo','Ricamo']];
+function renderTabs(){
+ $('tabs').innerHTML=TABS.map(([k,l])=>{const n=k==='abbinamenti'?'':k==='ricamo'?'':Object.keys(S[k]).length;
+  return `<button role="tab" id="tab-${k}" aria-selected="${UI.tab===k}" data-tab="${k}">${l}${n!==''?`<span class="n">${n}</span>`:''}</button>`}).join('');
+ $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{UI.tab=b.dataset.tab;try{history.replaceState(null,'','#'+UI.tab)}catch(e){};UI.arm=null;render();});
+}
+function renderCounts(){
+ const M=Object.values(S.modelli),pub=M.filter(m=>m.pubblicato).length;
+ const cols=allColours(),noH=cols.filter(c=>!(S.matrice.righe[c.id]||[]).length).length;
+ const noZip=Object.values(S.manici).filter(h=>!h.zip||!h.zip.hex).length;
+ $('counts').innerHTML=`<span class="count"><b>${M.length}</b>modelli · ${pub} pubblicati</span>
+  <span class="count"><b>${cols.length}</b>colori di tessuto</span>
+  <span class="count"><b>${Object.keys(S.manici).length}</b>manici</span>
+  ${noH?`<span class="count"><b>${noH}</b>colori senza manici</span>`:''}
+  ${noZip?`<span class="count"><b>${noZip}</b>manici senza zip</span>`:''}`;
+}
+function render(){renderTabs();renderCounts();({modelli:vModelli,tessuti:vTessuti,manici:vManici,abbinamenti:vMatrice,collezioni:vCollezioni,ricamo:vRicamo})[UI.tab]();}
+
+// ---------- salvataggio ----------
+function statusEl(){return document.querySelector('#view .savest');}
+function setStatus(t,c){const e=statusEl();if(e){e.textContent=t;e.className='status savest'+(c?' '+c:'');}}
+function touch(col,id){const key=col+'/'+id;UI.dirty[key]=1;setStatus(db?'Modifiche in salvataggio…':'Modifiche non salvate: apri la pagina da claude.ai per salvare.','warn');clearTimeout(UI.timers[key]);if(db)UI.timers[key]=setTimeout(()=>save(col,id),900);renderCounts();}
+async function save(col,id){const key=col+'/'+id;const data=col==='abbinamenti'?S.matrice:col==='impostazioni'?S.ricamo:S[col][id];if(!data)return;
+ try{data.aggiornato=new Date().toISOString();await db.doc(key).set(clone(data));delete UI.dirty[key];setStatus('Salvato alle '+hm(),'ok');}
+ catch(e){setStatus('Non salvato ('+(e&&e.code||'errore')+'). Riprova tra poco.','bad');}}
+async function remove(col,id){clearTimeout(UI.timers[col+'/'+id]);delete S[col][id];UI.sel[col]=null;if(db){try{await db.doc(col+'/'+id).delete();}catch(e){}}render();}
+function armDelete(btn,fn){if(UI.arm===btn.dataset.key){UI.arm=null;fn();return;}UI.arm=btn.dataset.key;btn.classList.add('arm');btn.textContent='Conferma: elimina';setTimeout(()=>{if(UI.arm===btn.dataset.key){UI.arm=null;btn.classList.remove('arm');btn.textContent=btn.dataset.label;}},4000);}
+
+// bind generico dei campi: data-k = percorso, data-t = num|bool|str, data-re = ridisegna
+function bind(root,obj,col,id,after){
+ root.querySelectorAll('[data-k]').forEach(el=>{const k=el.dataset.k,t=el.dataset.t||'str',v=getP(obj,k);
+  if(t==='bool')el.checked=!!v;else el.value=v??'';
+  const ev=(el.tagName==='SELECT'||t==='bool'||el.type==='color')?'change':'input';
+  el.addEventListener(ev,()=>{let x=t==='bool'?el.checked:el.value;if(t==='num')x=el.value===''?'':+String(el.value).replace(',','.');setP(obj,k,x);touch(col,id);if(el.dataset.re)after&&after();else refreshSide();});
+  if(el.type==='color'&&ev==='change')el.addEventListener('input',()=>{setP(obj,k,el.value);refreshSide(true);});
+ });
+}
+let sideFn=null;function refreshSide(light){sideFn&&sideFn(light);}
+
+// ---------- file: lettura e controllo ----------
+async function readImg(file){try{const bm=await createImageBitmap(file);const w=bm.width,h=bm.height;
+  const c=document.createElement('canvas');const sc=Math.min(1,160/Math.max(w,h));c.width=Math.max(1,Math.round(w*sc));c.height=Math.max(1,Math.round(h*sc));const x=c.getContext('2d');x.drawImage(bm,0,0,c.width,c.height);
+  const d=x.getImageData(0,0,c.width,c.height).data;let sat=0,alpha=0,n=0;for(let i=0;i<d.length;i+=4){if(d[i+3]<250)alpha++;if(d[i+3]>20){const mx=Math.max(d[i],d[i+1],d[i+2]),mn=Math.min(d[i],d[i+1],d[i+2]);sat+=mx?(mx-mn)/mx:0;n++;}}
+  return {w,h,sat:n?sat/n:0,alpha:alpha/(d.length/4)};}catch(e){return null;}}
+function checkFile(kind,info,file,ctx){
+ const out=[];const t=(file&&file.type)||'';
+ if(!info){out.push(['warn','Non riesco a leggere le misure di questo file (TIFF?). Va bene lo stesso, lo controllo io.']);return out;}
+ const dim=`${info.w} × ${info.h} px`;
+ if(kind==='foto'){if(info.w===STD.foto&&info.h===STD.foto)out.push(['ok',dim+', tela giusta']);else out.push(['warn',`${dim}: la tela dev'essere ${STD.foto} × ${STD.foto} px`]);
+  if(info.sat>.12)out.push(['warn','La foto sembra colorata: serve neutra (tessuto chiaro, manici bianchi)']);}
+ if(kind==='livello'){const f=ctx&&ctx.foto;if(f&&f.w&&(info.w!==f.w||info.h!==f.h))out.push(['bad',`${dim}: non è la stessa tela della foto (${f.w} × ${f.h})`]);else out.push(['ok',dim]);
+  if(!/png/.test(t))out.push(['warn','Serve PNG con trasparenza']);else if(info.alpha<.02)out.push(['warn','Non vedo trasparenza: esporta solo il pezzo, il resto trasparente']);}
+ if(kind==='tessuto'){const m=Math.min(info.w,info.h);if(m>=STD.tess)out.push(['ok',dim+', risoluzione giusta']);else if(m>=1200)out.push(['warn',`${dim}: un po' piccola, lo standard è ${STD.tess} px (20 cm a 300 dpi)`]);else out.push(['bad',`${dim}: troppo piccola, serve ${STD.tess} × ${STD.tess} px`]);
+  if(ctx&&ctx.neutra&&info.sat>.15)out.push(['warn','Sembra colorata: per la colorazione automatica serve la versione neutra o grigia']);}
+ if(kind==='manico'){const L=Math.max(info.w,info.h);if(L>=STD.man*.95)out.push(['ok',dim+', 25 cm a 300 dpi']);else out.push(['warn',`${dim}: lo standard è un tratto di 25 cm a 300 dpi (lato lungo circa ${STD.man} px)`]);}
+ if(file&&file.size>20*1024*1024)out.push(['bad','Il file supera 20 MB: salvalo in PNG 8 bit']);
+ return out;}
+async function uploadTo(file,kind,ctx){
+ if(!assets)throw {code:'no_assets'};
+ const info=/image\//.test(file.type)||!file.type?await readImg(file):null;
+ const msgs=checkFile(kind,info,file,ctx);
+ if(msgs.some(m=>m[0]==='bad'&&/20 MB/.test(m[1])))return {err:msgs};
+ let type=file.type;if(!type){const e=(file.name.split('.').pop()||'').toLowerCase();type={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',tif:'image/tiff',tiff:'image/tiff',ttf:'font/ttf',otf:'font/otf',woff:'font/woff',woff2:'font/woff2'}[e]||'';}
+ if(/font|ttf|otf|woff/.test(file.name.split('.').pop()))type={ttf:'font/ttf',otf:'font/otf',woff:'font/woff',woff2:'font/woff2'}[file.name.split('.').pop().toLowerCase()]||type;
+ const r=await assets.upload(file,type?{type}:undefined);
+ return {f:{id:r.id,nome:file.name,w:info&&info.w||null,h:info&&info.h||null,kb:Math.round(r.sizeBytes/1024),tipo:r.contentType,caricato:new Date().toISOString(),note:msgs}};
+}
+function slotHTML(key,label,f,o={}){
+ const cls='slot'+(f?' has':'')+(o.req?' req':'');
+ const msgs=f?(f.note||[]):[];
+ return `<div class="${cls}" data-slot="${esc(key)}">
+  <div class="pv">${f?(/image\/(png|jpe?g|webp|gif)/.test(f.tipo||'image/png')?`<img src="${blob(f.id)}" alt="">`:esc((f.tipo||'').split('/')[1]||'file')):'vuoto'}</div>
+  <div class="meta"><div class="nm">${esc(label)}${o.req?'':' <span class="muted small">(facoltativo)</span>'}</div>
+   ${o.sub?`<div class="ky">${esc(o.sub)}</div>`:''}
+   ${f?`<div class="ky">${esc(f.nome)} · ${f.kb} KB</div>`:''}
+   ${msgs.map(m=>`<div class="msg ${m[0]}">${esc(m[1])}</div>`).join('')}
+   <div class="row" style="margin-top:4px"><label class="b sm" style="border:1px solid var(--line);border-radius:4px;padding:4px 8px;cursor:${assets?'pointer':'not-allowed'};font-size:.78rem;opacity:${assets?1:.5}">${f?'Sostituisci':'Carica'}<input type="file" ${o.accept?`accept="${o.accept}"`:'accept="image/png,image/jpeg,image/tiff"'} ${assets?'':'disabled'}></label>
+   ${f?`<button class="b sm" data-clear type="button">Togli</button>`:''}<span class="status up"></span></div>
+  </div></div>`;}
+// collega gli slot: getF(key)->file, setF(key,f|null)
+function wireSlots(root,kindOf,ctxOf,setF){
+ root.querySelectorAll('[data-slot]').forEach(s=>{const key=s.dataset.slot;const inp=s.querySelector('input[type=file]');const st=s.querySelector('.up');
+  inp&&inp.addEventListener('change',async()=>{const file=inp.files[0];if(!file)return;st.textContent='Carico…';st.className='status up';
+   try{const r=await uploadTo(file,kindOf(key),ctxOf&&ctxOf(key));if(r.err){st.textContent=r.err.map(m=>m[1]).join(' ');st.className='status up bad';return;}setF(key,r.f);}
+   catch(e){st.textContent=e&&e.code==='unsupported_type'?'Formato non accettato: usa PNG o JPG':e&&e.code==='quota_exceeded'?'Spazio file pieno: avvisa Claude':'Caricamento non riuscito ('+(e&&e.code||'errore')+')';st.className='status up bad';}});
+  const c=s.querySelector('[data-clear]');c&&(c.onclick=()=>setF(key,null));});
+}
+
+// ---------- utilità colori ----------
+function allColours(){const out=[];Object.values(S.tessuti).sort(byName).forEach(t=>(t.colori||[]).forEach(c=>out.push({...c,fam:t.id,famNome:t.nome})));return out;}
+function colourById(id){for(const t of Object.values(S.tessuti))for(const c of (t.colori||[]))if(c.id===id)return {...c,fam:t.id,famNome:t.nome,t};return null;}
+const byName=(a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'it');
+const byCode=(a,b)=>String(a.codice||a.id).localeCompare(String(b.codice||b.id),'it',{numeric:true});
+const hx=h=>{h=(h||'#cccccc').replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];};
+const imgCache={};function loadImg(id){if(!id)return Promise.resolve(null);if(!imgCache[id])imgCache[id]=new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=blob(id);});return imgCache[id];}
+// tessuto colorato: trama neutra × colore (come nello Studio)
+async function paintFabric(ctx,w,h,col,fam,scale){
+ const t=fam||{};const hex=col&&col.hex||'#bbbbbb';
+ const own=col&&col.foto&&col.foto.id, neu=t.neutro&&t.neutro.id;
+ const im=await loadImg(own||neu);
+ if(!im){ctx.fillStyle=hex;ctx.fillRect(0,0,w,h);return;}
+ const s=scale||1;const tw=im.width*s,th=im.height*s;
+ for(let y=0;y<h;y+=th)for(let x=0;x<w;x+=tw)ctx.drawImage(im,x,y,tw,th);
+ if(own)return;
+ const d=ctx.getImageData(0,0,w,h),p=d.data,[r,g,b]=hx(hex);
+ for(let i=0;i<p.length;i+=4){const l=(p[i]*.299+p[i+1]*.587+p[i+2]*.114)/255;const k=Math.min(1.35,l/.64);p[i]=r*k;p[i+1]=g*k;p[i+2]=b*k;}
+ ctx.putImageData(d,0,0);}
+function bandsOf(h){const b=(h&&h.bande||[]).filter(x=>+x.w>0);return b.length?b:[{c:'#cccccc',w:100}];}
+function stripeHTML(h,vertical){const b=bandsOf(h),tot=b.reduce((a,x)=>a+ +x.w,0);return b.map(x=>`<i style="background:${esc(x.c)};${vertical?'width':'flex-basis'}:${(+x.w/tot*100).toFixed(2)}%"></i>`).join('');}
+
+// ======================= MODELLI =======================
+function modelCheck(m){
+ const L=[];const v=(m.viste||[]);
+ L.push([!!(m.nome&&m.tipo),'Nome e tipo di borsa']);
+ L.push([!!(m.misure&&m.misure.L&&m.misure.H),'Misure (almeno larghezza e altezza)']);
+ if(!v.length)L.push([false,'Almeno una vista della borsa']);
+ v.forEach(vi=>{const n=vi.nome||'vista';L.push([!!vi.foto,`${n}: foto neutra 2400 × 2400 px`]);
+  LAYERS.filter(l=>l.req||(l.ric&&m.ricamo&&m.ricamo.attivo)).forEach(l=>{if(l.k==='zip'&&m.senzaZip)return;if(l.k.startsWith('manico')&&m.senzaManici)return;L.push([!!(vi.livelli&&vi.livelli[l.k]),`${n}: livello ${l.k}`]);});});
+ L.push([m.prezzo!==''&&m.prezzo!=null,'Prezzo base']);
+ if(m.ricamo&&m.ricamo.attivo)L.push([!!(m.ricamo.larghezza&&m.ricamo.altezza),'Ricamo: misure della zona']);
+ return L;}
+function progress(L){const d=L.filter(x=>x[0]).length;return [d,L.length];}
+function newModel(){const id=uid('m');S.modelli[id]={id,nome:'Nuovo modello',tipo:'',misure:{L:'',H:'',P:''},caratteristiche:'',manici:'',prezzo:'',sku:'',varianti:[],pubblicato:false,ricamo:{attivo:false,larghezza:'',altezza:'',righe:1,maxCaratteri:12,prezzo:'',font:[]},viste:[{id:'v1',nome:'3/4',foto:null,livelli:{},extra:[]}]};UI.sel.modelli=id;touch('modelli',id);render();}
+function vModelli(){
+ const M=Object.values(S.modelli).sort(byName);
+ if(!UI.sel.modelli||!S.modelli[UI.sel.modelli])UI.sel.modelli=M[0]&&M[0].id;
+ const m=S.modelli[UI.sel.modelli];
+ $('view').innerHTML=`<div class="lab"><div class="list">
+  <button class="b primary" id="add" type="button" ${canWrite?'':'disabled'}>+ Nuovo modello</button>
+  ${M.length?M.map(x=>{const [d,t]=progress(modelCheck(x));return `<button class="item" aria-pressed="${x.id===UI.sel.modelli}" data-id="${x.id}" type="button">
+   <div class="pv thumb" style="width:44px;height:44px;background:var(--bg);display:grid;place-items:center;overflow:hidden">${x.viste&&x.viste[0]&&x.viste[0].foto?`<img src="${blob(x.viste[0].foto.id)}" alt="" style="width:100%;height:100%;object-fit:contain">`:'<span class="muted small mono">—</span>'}</div>
+   <div class="grow"><div class="t">${esc(x.nome)}</div><div class="s">${esc(x.tipo||'tipo da scegliere')}</div><div class="bar"><i class="${d===t?'full':''}" style="width:${t?d/t*100:0}%"></i></div></div>
+   ${x.pubblicato?'<span class="pill ok">online</span>':d===t?'<span class="pill warn">pronto</span>':`<span class="pill off">${d}/${t}</span>`}</button>`}).join(''):`<div class="empty">Nessun modello. Premi “Nuovo modello”.</div>`}
+ </div><div class="panel" id="ed">${m?'':'<div class="empty">Scegli un modello dall’elenco.</div>'}</div></div>`;
+ $('add').onclick=newModel;
+ $('view').querySelectorAll('.item').forEach(b=>b.onclick=()=>{UI.sel.modelli=b.dataset.id;UI.arm=null;vModelli();});
+ if(m)edModello(m);
+}
+function edModello(m){
+ m.ricamo=m.ricamo||{attivo:false,font:[]};m.viste=m.viste||[];m.varianti=m.varianti||[];m.misure=m.misure||{};
+ const vi=m.viste.find(v=>v.id===UI.view[m.id])||m.viste[0];
+ const L=modelCheck(m),[d,t]=progress(L);
+ const fonts=(S.ricamo||RIC_DEF).font||[];
+ const ed=$('ed');
+ ed.innerHTML=`
+ <div class="row" style="justify-content:space-between"><div><div class="eyebrow">Modello · ${esc(m.id)}</div><h2>${esc(m.nome)}</h2></div>
+  <div class="row"><span class="status savest">${UI.dirty['modelli/'+m.id]?'Modifiche in salvataggio…':''}</span><button class="b danger" data-key="del-${m.id}" data-label="Elimina modello" type="button" id="del" ${canWrite?'':'disabled'}>Elimina modello</button></div></div>
+
+ <section class="step"><h3><span class="num ${L[0][0]&&L[1][0]?'ok':''}">1</span>Dati del modello</h3>
+  <div class="grid">
+   <label class="f"><span>Nome</span><input class="i" data-k="nome" data-re="1"></label>
+   <label class="f"><span>Tipo di borsa</span><input class="i" data-k="tipo" list="tipi" placeholder="es. borsone, shopper"></label>
+   <label class="f"><span>Codice prodotto (SKU)</span><input class="i" data-k="sku" placeholder="facoltativo"></label>
+   <label class="f"><span>Larghezza (cm)</span><input class="i" data-k="misure.L" data-t="num" inputmode="decimal"></label>
+   <label class="f"><span>Altezza (cm)</span><input class="i" data-k="misure.H" data-t="num" inputmode="decimal"></label>
+   <label class="f"><span>Profondità (cm)</span><input class="i" data-k="misure.P" data-t="num" inputmode="decimal"></label>
+   <label class="f wide"><span>Manici e chiusura</span><input class="i" data-k="manici" placeholder="es. 2 manici lunghi a spalla"></label>
+   <label class="f wide"><span>Caratteristiche (le legge il cliente)</span><textarea class="i" data-k="caratteristiche" placeholder="Tasca interna, fodera lavabile, lati regolabili…"></textarea></label>
+   <label class="tog"><input type="checkbox" data-k="senzaZip" data-t="bool" data-re="1">Questo modello non ha la zip</label>
+   <label class="tog"><input type="checkbox" data-k="senzaManici" data-t="bool" data-re="1">Questo modello non ha manici a righe</label>
+  </div>
+  <datalist id="tipi"><option>borsone/duffle<option>shopper<option>shopper con zip<option>tote verticale<option>tote piatta<option>borsello/camera bag<option>pochette/clutch<option>bauletto<option>beauty case<option>zaino</datalist>
+ </section>
+
+ <section class="step"><h3><span class="num">2</span>Foto neutra e scontorni<span class="aside">${m.viste.length} ${m.viste.length===1?'vista':'viste'}</span></h3>
+  <div class="spec">Per ogni vista: <b>una foto neutra</b> (PNG, tela <b>2400 × 2400 px</b>, sfondo bianco, tessuto chiaro e manici bianchi) e <b>un PNG per ogni livello</b>, sulla stessa tela, con tutto il resto trasparente. In Photoshop: <i>File › Esporta › Livelli in file</i>, formato PNG-24 con trasparenza. Il nome del livello è scritto sotto ogni casella.</div>
+  <div class="row" id="vtabs">${m.viste.map(v=>`<button class="b ${v===vi?'primary':''}" data-v="${v.id}" type="button">${esc(v.nome||'vista')}</button>`).join('')}<button class="b" id="vadd" type="button">+ Vista</button></div>
+  ${vi?`<div class="row"><label class="f" style="flex:1 1 200px"><span>Nome della vista</span><input class="i" id="vname" value="${esc(vi.nome)}"></label>${m.viste.length>1?`<button class="b danger" data-key="delv-${vi.id}" data-label="Togli questa vista" id="vdel" type="button" style="align-self:end">Togli questa vista</button>`:''}</div>
+  <div class="slots" id="vfoto">${slotHTML('foto','Foto neutra',vi.foto,{req:1,sub:'foto.png · 2400 × 2400'})}</div>
+  <div class="slots" id="vliv">${LAYERS.filter(l=>!(l.ric&&!m.ricamo.attivo)&&!(l.k==='zip'&&m.senzaZip)&&!(l.k.startsWith('manico')&&m.senzaManici)).map(l=>slotHTML(l.k,l.l,vi.livelli&&vi.livelli[l.k],{req:l.req||l.ric,sub:l.k+'.png',accept:'image/png'})).join('')}
+   ${(vi.extra||[]).map(k=>slotHTML(k,'Livello in più',vi.livelli&&vi.livelli[k],{sub:k+'.png',accept:'image/png'})).join('')}</div>
+  <div class="row"><label class="f" style="flex:1 1 200px"><span>Altro livello (nome)</span><input class="i" id="xname" placeholder="es. tasca_frontale"></label><button class="b" id="xadd" type="button" style="align-self:end">+ Aggiungi livello</button></div>`:''}
+ </section>
+
+ <section class="step"><h3><span class="num ${m.prezzo!==''&&m.prezzo!=null?'ok':''}">3</span>Prezzo e varianti</h3>
+  <div class="grid"><label class="f"><span>Prezzo base (€)</span><input class="i" data-k="prezzo" data-t="num" inputmode="decimal" placeholder="es. 129"></label></div>
+  <div class="spec">Le varianti aggiungono un sovrapprezzo al prezzo base (es. “Con tracolla” +15 €). Lascia vuoto se il modello ha un solo prezzo.</div>
+  <div class="rows" id="vars">${m.varianti.map((x,i)=>`<div class="r"><input class="i" data-vi="${i}" data-f="nome" value="${esc(x.nome)}" placeholder="Nome variante" aria-label="Nome variante"><input class="i n" data-vi="${i}" data-f="sovrapprezzo" value="${esc(x.sovrapprezzo)}" inputmode="decimal" placeholder="+ €" aria-label="Sovrapprezzo"><button class="b sm" data-vdel="${i}" type="button">Togli</button></div>`).join('')}</div>
+  <div class="row"><button class="b" id="varadd" type="button">+ Variante di prezzo</button></div>
+ </section>
+
+ <section class="step"><h3><span class="num ${m.ricamo.attivo?(m.ricamo.larghezza&&m.ricamo.altezza?'ok':''):'ok'}">4</span>Ricamo</h3>
+  <label class="tog"><input type="checkbox" data-k="ricamo.attivo" data-t="bool" data-re="1">Su questo modello si può fare il ricamo</label>
+  ${m.ricamo.attivo?`<div class="spec">La zona è il rettangolo dove può stare la scritta, misurato sulla borsa vera. Le lettere si adattano da sole: se il testo non ci sta con lettere alte almeno ${String((S.ricamo||RIC_DEF).altezzaMin).replace('.',',')} cm, il cliente viene avvisato. Serve anche il livello <b>ricamo</b> qui sopra, che mi dice dove si trova sulla foto.</div>
+  <div class="grid">
+   <label class="f"><span>Larghezza zona (cm)</span><input class="i" data-k="ricamo.larghezza" data-t="num" inputmode="decimal" placeholder="es. 10"></label>
+   <label class="f"><span>Altezza zona (cm)</span><input class="i" data-k="ricamo.altezza" data-t="num" inputmode="decimal" placeholder="es. 3"></label>
+   <label class="f"><span>Righe al massimo</span><select class="i" data-k="ricamo.righe" data-t="num"><option value="1">1 riga</option><option value="2">2 righe</option></select></label>
+   <label class="f"><span>Caratteri al massimo</span><input class="i" data-k="ricamo.maxCaratteri" data-t="num" inputmode="numeric"></label>
+   <label class="f"><span>Prezzo ricamo (€)</span><input class="i" data-k="ricamo.prezzo" data-t="num" inputmode="decimal" placeholder="${(S.ricamo||RIC_DEF).prezzo!==''?'standard '+eur((S.ricamo||RIC_DEF).prezzo):'come lo standard'}"></label>
+  </div>
+  <div class="f"><span class="small muted">Font ammessi su questo modello (nessuno scelto = tutti)</span><div class="row" id="mfonts">${fonts.map(f=>`<label class="tog small"><input type="checkbox" value="${esc(f.id)}" ${(m.ricamo.font||[]).includes(f.id)?'checked':''}>${esc(f.nome)}</label>`).join('')||'<span class="muted small">Aggiungi i font nella scheda Ricamo.</span>'}</div></div>`:''}
+ </section>
+
+ <section class="step"><h3><span class="num ${d===t?'ok':''}">5</span>Pubblicazione<span class="aside">${d} di ${t} fatti</span></h3>
+  <ul class="todo">${L.map(x=>`<li class="${x[0]?'ok':''}">${esc(x[1])}</li>`).join('')}</ul>
+  <label class="tog"><input type="checkbox" data-k="pubblicato" data-t="bool" data-re="1">Pubblicato nel configuratore</label>
+  ${m.pubblicato&&d<t?'<div class="notice warn small">È segnato come pubblicato ma mancano dei pezzi: il cliente non lo vedrà finché non sono completi.</div>':''}
+  ${d===t&&!m.pubblicato?'<div class="notice small">Tutto caricato. Ora preparo io le mappe e le ombre; poi regoli i manici nello Studio e lo pubblichi.</div>':''}
+ </section>`;
+ const re=()=>edModello(m);
+ bind(ed,m,'modelli',m.id,()=>{vModelli();});
+ sideFn=()=>{};
+ $('del').onclick=e=>armDelete(e.currentTarget,()=>remove('modelli',m.id));
+ ed.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{UI.view[m.id]=b.dataset.v;re();});
+ $('vadd').onclick=()=>{const v={id:uid('v'),nome:'Fronte',foto:null,livelli:{},extra:[]};m.viste.push(v);UI.view[m.id]=v.id;touch('modelli',m.id);re();};
+ if(vi){
+  $('vname').oninput=e=>{vi.nome=e.target.value;touch('modelli',m.id);};$('vname').onchange=re;
+  $('vdel')&&($('vdel').onclick=e=>armDelete(e.currentTarget,()=>{m.viste=m.viste.filter(v=>v!==vi);touch('modelli',m.id);re();}));
+  wireSlots($('vfoto'),()=>'foto',null,(k,f)=>{vi.foto=f;touch('modelli',m.id);vModelli();});
+  wireSlots($('vliv'),()=>'livello',()=>({foto:vi.foto}),(k,f)=>{vi.livelli=vi.livelli||{};if(f)vi.livelli[k]=f;else delete vi.livelli[k];touch('modelli',m.id);vModelli();});
+  $('xadd').onclick=()=>{const k=slug($('xname').value);if(!k)return;vi.extra=vi.extra||[];if(!vi.extra.includes(k)&&!LAYERS.some(l=>l.k===k))vi.extra.push(k);touch('modelli',m.id);re();};
+ }
+ ed.querySelectorAll('[data-vi]').forEach(el=>el.oninput=()=>{const x=m.varianti[+el.dataset.vi];x[el.dataset.f]=el.dataset.f==='sovrapprezzo'?(el.value===''?'':+el.value.replace(',','.')):el.value;touch('modelli',m.id);});
+ ed.querySelectorAll('[data-vdel]').forEach(b=>b.onclick=()=>{m.varianti.splice(+b.dataset.vdel,1);touch('modelli',m.id);re();});
+ $('varadd').onclick=()=>{m.varianti.push({nome:'',sovrapprezzo:''});touch('modelli',m.id);re();};
+ $('mfonts')&&$('mfonts').querySelectorAll('input').forEach(c=>c.onchange=()=>{m.ricamo.font=[...$('mfonts').querySelectorAll('input:checked')].map(x=>x.value);touch('modelli',m.id);});
+}
+
+// ======================= TESSUTI =======================
+function famCheck(t){const L=[];L.push([!!t.nome,'Nome della famiglia']);L.push([!!t.tipo,'Tipo di tessuto']);
+ if(t.modo!=='come')L.push([!!t.neutro,'Scansione neutra 20 × 20 cm a 300 dpi']);
+ L.push([!!t.radente,'Scansione con luce radente (consigliata)']);
+ L.push([(t.colori||[]).length>0,'Almeno un colore']);
+ if(t.modo==='come')(t.colori||[]).forEach(c=>L.push([!!c.foto,`${c.nome||'colore'}: scansione della variante`]));
+ else (t.colori||[]).forEach(c=>L.push([/^#[0-9a-f]{6}$/i.test(c.hex||''),`${c.nome||'colore'}: codice colore`]));
+ return L;}
+function newFam(){const id=uid('t');S.tessuti[id]={id,nome:'Nuovo tessuto',tipo:'',descrizione:'',aspetto:'',modo:'moltiplica',neutro:null,radente:null,larghezzaCm:20,colori:[]};UI.sel.tessuti=id;touch('tessuti',id);render();}
+function vTessuti(){
+ const T=Object.values(S.tessuti).sort(byName);
+ if(!UI.sel.tessuti||!S.tessuti[UI.sel.tessuti])UI.sel.tessuti=T[0]&&T[0].id;
+ const t=S.tessuti[UI.sel.tessuti];
+ $('view').innerHTML=`<div class="lab"><div class="list">
+  <button class="b primary" id="add" type="button" ${canWrite?'':'disabled'}>+ Nuova famiglia di tessuto</button>
+  ${T.map(x=>{const [d,n]=progress(famCheck(x));return `<button class="item" aria-pressed="${x.id===UI.sel.tessuti}" data-id="${x.id}" type="button">
+   <div class="row nowrap" style="gap:2px;flex:none">${(x.colori||[]).slice(0,5).map(c=>`<i style="width:9px;height:36px;border-radius:2px;background:${esc(c.hex||'#ccc')}"></i>`).join('')||'<i style="width:36px;height:36px;border-radius:3px;background:var(--bg)"></i>'}</div>
+   <div class="grow"><div class="t">${esc(x.nome)}</div><div class="s">${esc(x.tipo||'tipo da scegliere')} · ${(x.colori||[]).length} colori</div><div class="bar"><i class="${d===n?'full':''}" style="width:${n?d/n*100:0}%"></i></div></div>
+   <span class="pill ${d===n?'ok':'off'}">${d}/${n}</span></button>`}).join('')||'<div class="empty">Nessun tessuto.</div>'}
+ </div><div class="panel" id="ed">${t?'':'<div class="empty">Scegli un tessuto.</div>'}</div></div>`;
+ $('add').onclick=newFam;
+ $('view').querySelectorAll('.item').forEach(b=>b.onclick=()=>{UI.sel.tessuti=b.dataset.id;UI.arm=null;vTessuti();});
+ if(t)edTessuto(t);
+}
+function edTessuto(t){
+ t.colori=t.colori||[];const L=famCheck(t),[d,n]=progress(L);const come=t.modo==='come';
+ const ed=$('ed');
+ ed.innerHTML=`<div class="row" style="justify-content:space-between"><div><div class="eyebrow">Tessuto · ${esc(t.id)}</div><h2>${esc(t.nome)}</h2></div>
+  <div class="row"><span class="status savest"></span><button class="b danger" data-key="del-${t.id}" data-label="Elimina tessuto" id="del" type="button" ${canWrite?'':'disabled'}>Elimina tessuto</button></div></div>
+ <section class="step"><h3><span class="num ${L[0][0]&&L[1][0]?'ok':''}">1</span>Dati del tessuto</h3>
+  <div class="grid">
+   <label class="f"><span>Nome della famiglia</span><input class="i" data-k="nome" data-re="1"></label>
+   <label class="f"><span>Tipo di tessuto</span><input class="i" data-k="tipo" list="ttipi" placeholder="es. Neoprene"></label>
+   <label class="f wide"><span>Descrizione (la legge il cliente)</span><input class="i" data-k="descrizione" placeholder="es. Tessuto tecnico impermeabile e lavabile"></label>
+   <label class="f wide"><span>Aspetto (per me, come appare la trama)</span><input class="i" data-k="aspetto" placeholder="es. rete a nido d'ape con fondo nero nei fori"></label>
+   <label class="f wide"><span>Come si colora</span><select class="i" data-k="modo" data-re="1"><option value="moltiplica">Stessa trama in tanti colori: una scansione neutra × il codice colore</option><option value="come">Stampato, mélange o con riflessi: una scansione per ogni variante</option></select></label>
+  </div><datalist id="ttipi">${TIPI_TESSUTO.map(x=>`<option>${x}`).join('')}</datalist>
+ </section>
+ <section class="step"><h3><span class="num ${(come||t.neutro)?'ok':''}">2</span>Scansioni della trama</h3>
+  <div class="spec">PNG o TIFF, 8 bit, <b>quadrato di 20 × 20 cm a 300 dpi = ${STD.tess} × ${STD.tess} px</b>, piatto e senza pieghe. ${come?'Per questo tipo la neutra è facoltativa: carichi ogni variante qui sotto.':'La <b>neutra</b> è il tessuto più chiaro o grigio, senza dominanti: da questa coloro tutte le varianti.'} La <b>luce radente</b> è la stessa zona illuminata di lato, molto inclinata, così si vede il rilievo della trama: la uso per le ombre del tessuto.</div>
+  <div class="slots" id="tslots">${slotHTML('neutro','Scansione neutra',t.neutro,{req:!come,sub:'neutra · 2362 × 2362'})}${slotHTML('radente','Scansione con luce radente',t.radente,{sub:'radente · stessa zona'})}</div>
+  <div class="grid"><label class="f"><span>Lato reale della scansione (cm)</span><input class="i" data-k="larghezzaCm" data-t="num" inputmode="decimal"></label></div>
+ </section>
+ <section class="step"><h3><span class="num ${(t.colori.length&&L.slice(5).every(x=>x[0]))?'ok':''}">3</span>Colori<span class="aside">${t.colori.length}</span></h3>
+  <div class="spec">${come?'Per ogni variante carica la sua scansione già colorata (stesse regole della neutra).':'Per ogni variante basta il nome e il codice colore. L’anteprima mostra la trama neutra colorata come sulla borsa; correggi il codice finché somiglia al campione vero.'} I manici ammessi per ogni colore si scelgono nella scheda Abbinamenti.</div>
+  <div class="rows" id="cols">${t.colori.map((c,i)=>`<div class="r" data-ci="${i}" style="border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--bg)">
+    <canvas width="120" height="72" style="width:120px;height:72px;border-radius:4px;flex:none" data-pv="${i}"></canvas>
+    <div class="f" style="flex:1 1 140px"><span>Nome colore</span><input class="i" data-cf="nome" value="${esc(c.nome)}"></div>
+    ${come?'':`<div class="f" style="flex:0 0 auto"><span>Colore</span><div class="row nowrap"><input type="color" data-cf="hex" value="${esc(/^#[0-9a-f]{6}$/i.test(c.hex||'')?c.hex:'#888888')}" aria-label="Colore"><input class="i mono" data-cf="hexT" value="${esc(c.hex||'')}" style="width:92px" aria-label="Codice colore"></div></div>`}
+    <label class="tog small" style="align-self:end;margin-bottom:6px"><input type="checkbox" data-cf="attivo" ${c.attivo!==false?'checked':''}>In vendita</label>
+    <button class="b sm danger" data-key="delc-${t.id}-${i}" data-label="Togli" data-cdel="${i}" type="button" style="align-self:end;margin-bottom:4px">Togli</button>
+    ${come?`<div class="slots" style="flex:1 1 100%" data-cslot="${i}">${slotHTML('c'+i,'Scansione della variante',c.foto,{req:1})}</div>`:''}
+   </div>`).join('')}</div>
+  <div class="row"><button class="b" id="cadd" type="button">+ Colore</button></div>
+ </section>
+ <section class="step"><h3><span class="num ${d===n?'ok':''}">4</span>Cosa manca<span class="aside">${d} di ${n} fatti</span></h3>
+  <ul class="todo">${L.map(x=>`<li class="${x[0]?'ok':''}">${esc(x[1])}</li>`).join('')}</ul></section>`;
+ const re=()=>edTessuto(t);
+ bind(ed,t,'tessuti',t.id,()=>vTessuti());
+ $('del').onclick=e=>armDelete(e.currentTarget,()=>remove('tessuti',t.id));
+ wireSlots($('tslots'),()=>'tessuto',k=>({neutra:k==='neutro'&&!come}),(k,f)=>{t[k]=f;touch('tessuti',t.id);vTessuti();});
+ const pv=i=>{const cv=ed.querySelector(`[data-pv="${i}"]`);if(!cv)return;paintFabric(cv.getContext('2d',{willReadFrequently:true}),120,72,t.colori[i],t,.12);};
+ t.colori.forEach((c,i)=>pv(i));
+ ed.querySelectorAll('[data-ci]').forEach(row=>{const i=+row.dataset.ci,c=t.colori[i];
+  row.querySelectorAll('[data-cf]').forEach(el=>{const f=el.dataset.cf;
+   const h=()=>{if(f==='attivo')c.attivo=el.checked;else if(f==='hex'){c.hex=el.value;row.querySelector('[data-cf="hexT"]').value=el.value;}else if(f==='hexT'){let v=el.value.trim();if(v&&v[0]!=='#')v='#'+v;c.hex=v;if(/^#[0-9a-f]{6}$/i.test(v))row.querySelector('[data-cf="hex"]').value=v;}else c[f]=el.value;
+    if(f==='nome'&&!c.idFisso){}pv(i);touch('tessuti',t.id);};
+   el.addEventListener(f==='attivo'?'change':'input',h);});
+  const del=row.querySelector('[data-cdel]');del.onclick=e=>armDelete(e.currentTarget,()=>{t.colori.splice(i,1);touch('tessuti',t.id);vTessuti();});
+  const cs=row.querySelector('[data-cslot]');cs&&wireSlots(cs,()=>'tessuto',null,(k,f)=>{c.foto=f;touch('tessuti',t.id);re();});
+ });
+ $('cadd').onclick=()=>{const n=t.colori.length+1;t.colori.push({id:(slug(t.nome)||t.id)+'_'+Date.now().toString(36),nome:'Colore '+n,hex:'#888888',attivo:true});touch('tessuti',t.id);re();};
+}
+
+// ======================= MANICI =======================
+function manCheck(h){const L=[];L.push([!!h.codice,'Codice del manico']);L.push([!!h.scansione,'Scansione dritta di 25 cm a 300 dpi']);
+ L.push([bandsOf(h).length>0&&(h.bande||[]).length>0,'Bande (colori e larghezze)']);L.push([!!(h.zip&&/^#[0-9a-f]{6}$/i.test(h.zip.hex||'')),'Colore della zip abbinata']);return L;}
+function newMan(){const id=uid('h');S.manici[id]={id,codice:'',descrizione:'',tipo:'rigato',scansione:null,bande:[{c:'#1c2147',w:30},{c:'#eedc8a',w:40},{c:'#1c2147',w:30}],zip:{nome:'',hex:''},attivo:true};UI.sel.manici=id;touch('manici',id);render();}
+function vManici(){
+ const H=Object.values(S.manici).sort(byCode);
+ if(!UI.sel.manici||!S.manici[UI.sel.manici])UI.sel.manici=H[0]&&H[0].id;
+ const h=S.manici[UI.sel.manici];
+ $('view').innerHTML=`<div class="lab"><div class="list">
+  <button class="b primary" id="add" type="button" ${canWrite?'':'disabled'}>+ Nuovo manico</button>
+  ${H.map(x=>{const [d,n]=progress(manCheck(x));return `<button class="item" aria-pressed="${x.id===UI.sel.manici}" data-id="${x.id}" type="button">
+   <div style="width:20px;height:40px;display:flex;border-radius:2px;overflow:hidden;flex:none;border:1px solid var(--line)">${stripeHTML(x,true)}</div>
+   <div class="grow"><div class="t">${esc(x.codice||'senza codice')}</div><div class="s">${esc(x.descrizione||x.tipo)}</div><div class="bar"><i class="${d===n?'full':''}" style="width:${d/n*100}%"></i></div></div>
+   ${x.zip&&x.zip.hex?`<span title="Zip ${esc(x.zip.nome)}" style="width:14px;height:14px;border-radius:50%;background:${esc(x.zip.hex)};border:1px solid var(--line);flex:none"></span>`:'<span class="pill warn">zip?</span>'}</button>`}).join('')||'<div class="empty">Nessun manico.</div>'}
+ </div><div class="panel" id="ed">${h?'':'<div class="empty">Scegli un manico.</div>'}</div></div>`;
+ $('add').onclick=newMan;
+ $('view').querySelectorAll('.item').forEach(b=>b.onclick=()=>{UI.sel.manici=b.dataset.id;UI.arm=null;vManici();});
+ if(h)edManico(h);
+}
+function edManico(h){
+ h.bande=h.bande||[];h.zip=h.zip||{nome:'',hex:''};const L=manCheck(h),[d,n]=progress(L);
+ const used=allColours().filter(c=>(S.matrice.righe[c.id]||[]).includes(h.id));
+ const ed=$('ed');
+ ed.innerHTML=`<div class="row" style="justify-content:space-between"><div><div class="eyebrow">Manico · ${esc(h.id)}</div><h2>${esc(h.codice?'Manico '+h.codice:'Nuovo manico')}</h2></div>
+  <div class="row"><span class="status savest"></span><button class="b danger" data-key="del-${h.id}" data-label="Elimina manico" id="del" type="button" ${canWrite?'':'disabled'}>Elimina manico</button></div></div>
+ <section class="step"><h3><span class="num ${L[0][0]?'ok':''}">1</span>Dati del manico</h3>
+  <div class="grid">
+   <label class="f"><span>Codice</span><input class="i" data-k="codice" data-re="1" placeholder="es. 56"></label>
+   <label class="f"><span>Tipo</span><select class="i" data-k="tipo"><option value="rigato">A righe</option><option value="tinta-unita">Tinta unita</option></select></label>
+   <label class="f"><span>Larghezza del nastro (mm)</span><input class="i" data-k="larghezzaMm" data-t="num" inputmode="decimal" placeholder="uguale per tutti"></label>
+   <label class="f wide"><span>Descrizione dei colori</span><input class="i" data-k="descrizione" placeholder="es. blu navy / crema / verde militare / crema / blu navy"></label>
+   <label class="tog"><input type="checkbox" data-k="attivo" data-t="bool">In vendita</label>
+  </div></section>
+ <section class="step"><h3><span class="num ${L[1][0]?'ok':''}">2</span>Scansione</h3>
+  <div class="spec">PNG o TIFF, 8 bit, <b>un tratto dritto di 25 cm a 300 dpi</b> (lato lungo circa ${STD.man} px), ritagliato da bordo a bordo del nastro, appoggiato piatto. Dopo il caricamento posso leggere le bande da sola.</div>
+  <div class="slots" id="hslot">${slotHTML('scan','Scansione del manico',h.scansione,{req:1,sub:'manico_'+(h.codice||'codice')+'.png'})}</div>
+ </section>
+ <section class="step"><h3><span class="num ${L[2][0]?'ok':''}">3</span>Bande</h3>
+  <div class="spec">Da sinistra a destra, con la larghezza in percentuale del nastro. Le righe interne possono avere larghezze diverse. Le stesse bande si regolano anche nello Studio, sulla borsa.</div>
+  <div class="strip" id="strip"></div>
+  <div class="rows" id="bands">${h.bande.map((b,i)=>`<div class="r" data-bi="${i}"><span class="mono small muted" style="width:22px">${i+1}</span><input type="color" value="${esc(b.c)}" data-bf="c" aria-label="Colore banda ${i+1}"><input class="i mono" value="${esc(b.c)}" data-bf="cT" style="flex:0 0 96px" aria-label="Codice banda ${i+1}"><input class="i n" value="${esc(b.w)}" data-bf="w" inputmode="decimal" aria-label="Larghezza banda ${i+1} in percentuale"><span class="small muted">%</span><button class="b sm" data-bdel="${i}" type="button">Togli</button></div>`).join('')}</div>
+  <div class="row"><button class="b" id="badd" type="button">+ Banda</button><button class="b" id="bread" type="button" ${h.scansione?'':'disabled'}>Leggi le bande dalla scansione</button><span class="status" id="bst"></span></div>
+ </section>
+ <section class="step"><h3><span class="num ${L[3][0]?'ok':''}">4</span>Zip abbinata</h3>
+  <div class="spec">Ogni manico decide il colore della zip, e il ricamo prende lo stesso colore. Il cliente non lo sceglie.</div>
+  <div class="row"><input type="color" id="zc" value="${esc(/^#[0-9a-f]{6}$/i.test(h.zip.hex||'')?h.zip.hex:'#888888')}" aria-label="Colore zip"><input class="i mono" id="zt" value="${esc(h.zip.hex||'')}" style="width:96px" placeholder="#rrggbb" aria-label="Codice colore zip"><label class="f" style="flex:1 1 180px"><span>Nome del colore zip</span><input class="i" data-k="zip.nome" placeholder="es. Blu navy"></label></div>
+  <div class="small muted">${used.length?`Usato con ${used.length} ${used.length===1?'colore':'colori'} di tessuto: ${used.map(c=>esc(c.famNome+' '+c.nome)).join(', ')}.`:'Non è ancora abbinato a nessun tessuto.'}</div>
+ </section>
+ <section class="step"><h3><span class="num ${d===n?'ok':''}">5</span>Cosa manca<span class="aside">${d} di ${n} fatti</span></h3><ul class="todo">${L.map(x=>`<li class="${x[0]?'ok':''}">${esc(x[1])}</li>`).join('')}</ul></section>`;
+ const re=()=>edManico(h);
+ bind(ed,h,'manici',h.id,()=>vManici());
+ $('del').onclick=e=>armDelete(e.currentTarget,()=>remove('manici',h.id));
+ const strip=()=>{$('strip').innerHTML=stripeHTML(h);};strip();
+ wireSlots($('hslot'),()=>'manico',null,(k,f)=>{h.scansione=f;touch('manici',h.id);vManici();});
+ ed.querySelectorAll('[data-bi]').forEach(r=>{const i=+r.dataset.bi,b=h.bande[i];r.querySelectorAll('[data-bf]').forEach(el=>el.addEventListener('input',()=>{const f=el.dataset.bf;
+  if(f==='c'){b.c=el.value;r.querySelector('[data-bf="cT"]').value=el.value;}else if(f==='cT'){let v=el.value.trim();if(v&&v[0]!=='#')v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v)){b.c=v;r.querySelector('[data-bf="c"]').value=v;}}else b.w=el.value===''?0:+el.value.replace(',','.');
+  strip();touch('manici',h.id);}));});
+ ed.querySelectorAll('[data-bdel]').forEach(x=>x.onclick=()=>{h.bande.splice(+x.dataset.bdel,1);touch('manici',h.id);re();});
+ $('badd').onclick=()=>{h.bande.push({c:'#cccccc',w:10});touch('manici',h.id);re();};
+ $('bread').onclick=async()=>{const im=await loadImg(h.scansione&&h.scansione.id);if(!im){$('bst').textContent='Non riesco ad aprire la scansione.';return;}const b=readBands(im);if(!b.length){$('bst').textContent='Bande non trovate.';return;}h.bande=b;touch('manici',h.id);re();$('bst').textContent=b.length+' bande lette: controllale.';$('bst').className='status ok';};
+ const zset=v=>{h.zip.hex=v;touch('manici',h.id);};
+ $('zc').oninput=e=>{$('zt').value=e.target.value;zset(e.target.value);};
+ $('zt').oninput=e=>{let v=e.target.value.trim();if(v&&v[0]!=='#')v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v)){$('zc').value=v;zset(v);}};
+}
+// stesso metodo di bands.py: mediana per colonna, salti di colore > 40, unione sotto il 3%
+function readBands(im){const W=Math.min(600,im.width),H=Math.min(600,im.height);const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.drawImage(im,0,0,W,H);const d=x.getImageData(0,0,W,H).data;
+ const horiz=im.width>=im.height; // nastro disteso in orizzontale: le bande sono le righe
+ const N=horiz?H:W,M=horiz?W:H;const cols=[];
+ for(let a=0;a<N;a++){const R=[],G=[],B=[];for(let b=Math.floor(M*.2);b<M*.8;b+=2){const i=horiz?(a*W+b)*4:(b*W+a)*4;R.push(d[i]);G.push(d[i+1]);B.push(d[i+2]);}const md=v=>v.sort((p,q)=>p-q)[v.length>>1];cols.push([md(R),md(G),md(B)]);}
+ // togli i bordi chiari dello sfondo
+ const segs=[];let s=0;const dist=(p,q)=>Math.hypot(p[0]-q[0],p[1]-q[1],p[2]-q[2]);
+ for(let i=1;i<=N;i++){if(i===N||dist(cols[i],cols[i-1])>40){segs.push([s,i]);s=i;}}
+ const toHex=c=>'#'+c.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+ let out=segs.map(([a,b])=>{const mid=cols.slice(a,b).sort((p,q)=>(p[0]+p[1]+p[2])-(q[0]+q[1]+q[2]));return {c:mid[mid.length>>1],n:b-a};});
+ const tot=N;out=out.filter(o=>o.n/tot>=.03);
+ const merged=[];out.forEach(o=>{const l=merged[merged.length-1];if(l&&dist(l.c,o.c)<30){l.n+=o.n;}else merged.push({...o});});
+ const T=merged.reduce((a,o)=>a+o.n,0);return merged.map(o=>({c:toHex(o.c),w:+(o.n/T*100).toFixed(1)}));}
+
+// ======================= ABBINAMENTI =======================
+function vMatrice(){
+ const H=Object.values(S.manici).sort(byCode);const T=Object.values(S.tessuti).sort(byName);
+ const fam=UI.matFam||'';
+ const rowsHTML=T.filter(t=>!fam||t.id===fam).map(t=>`<tr class="fam"><th class="rh" colspan="1">${esc(t.nome)}</th><td colspan="${H.length+1}"></td></tr>`+
+  (t.colori||[]).map(c=>{const sel=S.matrice.righe[c.id]||[];const zips=[...new Set(sel.map(id=>S.manici[id]&&S.manici[id].zip&&S.manici[id].zip.hex).filter(Boolean))];
+   const stc=!sel.length?'<span class="pill bad">non vendibile</span>':sel.length>4?`<span class="pill warn">${sel.length} manici</span>`:`<span class="pill ok">${sel.length} ${sel.length===1?'manico':'manici'}</span>`;
+   return `<tr><th class="rh"><div class="row"><span class="sq" style="background:${esc(c.hex||'#ccc')}"></span><span>${esc(c.nome)}</span>${c.attivo===false?'<span class="pill off">fuori</span>':''}</div></th>
+   ${H.map(h=>`<td class="c"><button type="button" data-c="${esc(c.id)}" data-h="${esc(h.id)}" aria-pressed="${sel.includes(h.id)}" aria-label="${esc(t.nome+' '+c.nome+' con manico '+(h.codice||h.id))}">${sel.includes(h.id)?'●':'·'}</button></td>`).join('')}
+   <td class="st">${stc} ${zips.map(z=>`<span title="zip" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${esc(z)};border:1px solid var(--line);vertical-align:middle"></span>`).join('')}</td></tr>`}).join('')).join('');
+ $('view').innerHTML=`<div style="display:flex;flex-direction:column;gap:12px">
+  <div class="row" style="justify-content:space-between"><p class="muted">Per ogni colore di tessuto, clicca i manici che il cliente può scegliere (circa 4). Un colore senza manici non si vende. Il pallino sotto ogni manico è il colore della zip che si porta dietro.</p>
+   <div class="row"><label class="f"><span>Mostra</span><select class="i" id="mf"><option value="">Tutti i tessuti</option>${T.map(t=>`<option value="${esc(t.id)}" ${fam===t.id?'selected':''}>${esc(t.nome)}</option>`).join('')}</select></label><span class="status savest"></span></div></div>
+  ${H.length&&T.length?`<div class="mx"><table><thead><tr><th class="rh">Tessuto e colore</th>${H.map(h=>`<th title="${esc(h.descrizione||'')}"><div class="hs">${stripeHTML(h)}</div>${esc(h.codice||'?')}<span class="zd" style="background:${esc(h.zip&&h.zip.hex||'transparent')}"></span></th>`).join('')}<th class="st">Stato</th></tr></thead><tbody>${rowsHTML}</tbody></table></div>`:'<div class="empty">Servono almeno un tessuto e un manico.</div>'}
+ </div>`;
+ $('mf').onchange=e=>{UI.matFam=e.target.value;vMatrice();};
+ $('view').querySelectorAll('td.c button').forEach(b=>b.onclick=()=>{if(!canWrite)return;const c=b.dataset.c,h=b.dataset.h;const a=S.matrice.righe[c]=S.matrice.righe[c]||[];const i=a.indexOf(h);if(i>=0)a.splice(i,1);else a.push(h);touch('abbinamenti','matrice');const y=window.scrollY,mx=$('view').querySelector('.mx'),sx=mx.scrollLeft,sy=mx.scrollTop;vMatrice();const m2=$('view').querySelector('.mx');m2.scrollLeft=sx;m2.scrollTop=sy;window.scrollTo(0,y);setStatus(db?'Modifiche in salvataggio…':'Non salvato','warn');});
+}
+
+// ======================= COLLEZIONI =======================
+async function drawBag(cv,col,man,mod){
+ const W=cv.width,H=cv.height,x=cv.getContext('2d',{willReadFrequently:true});x.clearRect(0,0,W,H);
+ const bx=W*.14,by=H*.36,bw=W*.72,bh=H*.52,r=W*.06;
+ // corpo con il tessuto
+ const off=document.createElement('canvas');off.width=W;off.height=H;const o=off.getContext('2d',{willReadFrequently:true});
+ await paintFabric(o,W,H,col,col&&col.t,.14);
+ x.save();x.beginPath();x.roundRect(bx,by,bw,bh,r);x.clip();x.drawImage(off,0,0);
+ const g=x.createLinearGradient(0,by,0,by+bh);g.addColorStop(0,'rgba(255,255,255,.18)');g.addColorStop(.5,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.28)');x.fillStyle=g;x.fillRect(bx,by,bw,bh);
+ // zip
+ const zh=(man&&man.zip&&man.zip.hex)||'#9a9a9a';x.fillStyle=zh;x.fillRect(bx,by+bh*.07,bw,H*.025);x.restore();
+ // manico: archi concentrici per le bande
+ const b=bandsOf(man),tot=b.reduce((a,v)=>a+ +v.w,0),hw=W*.05,cx=W/2,cy=by+2,R=W*.22;let acc=0;
+ b.forEach(v=>{const w=+v.w/tot*hw;x.beginPath();x.strokeStyle=v.c;x.lineWidth=w+.6;x.arc(cx,cy,R-hw/2+acc+w/2,Math.PI*1.03,Math.PI*1.97);x.stroke();acc+=w;});
+ x.fillStyle='#8a6a3a';[[cx-R,cy],[cx+R,cy]].forEach(([px,py])=>{x.beginPath();x.arc(px,py,W*.018,0,7);x.fill();});
+}
+function newColl(){const id=uid('c');const n=Object.keys(S.collezioni).length;S.collezioni[id]={id,nome:'Nuova combinazione',etichetta:'Preferito',modello:'',colore:'',manico:'',ordine:n+1,pubblicato:false,descrizione:''};UI.sel.collezioni=id;touch('collezioni',id);render();}
+function vCollezioni(){
+ const C=Object.values(S.collezioni).sort((a,b)=>(+a.ordine||0)-(+b.ordine||0));
+ if(!UI.sel.collezioni||!S.collezioni[UI.sel.collezioni])UI.sel.collezioni=C[0]&&C[0].id;
+ const c=S.collezioni[UI.sel.collezioni];
+ $('view').innerHTML=`<div style="display:flex;flex-direction:column;gap:14px">
+  <div class="row" style="justify-content:space-between"><p class="muted">Le borse già fatte e finite che il cliente vede per prime: più vendute, preferite, collezioni. Puoi scegliere solo i manici ammessi per quel tessuto.</p><button class="b primary" id="add" type="button" ${canWrite?'':'disabled'}>+ Nuova combinazione</button></div>
+  <div class="cards" id="cards">${C.map(x=>{const m=S.modelli[x.modello];return `<button class="card" type="button" data-id="${x.id}" aria-pressed="${x.id===UI.sel.collezioni}"><canvas width="320" height="240" data-cv="${x.id}"></canvas>
+   <div class="row" style="justify-content:space-between"><span class="t">${esc(x.nome)}</span>${x.pubblicato?'<span class="pill ok">online</span>':'<span class="pill off">bozza</span>'}</div>
+   <div class="small muted">${esc(x.etichetta||'')} · ${esc(m?m.nome:'modello?')}</div></button>`}).join('')||'<div class="empty">Nessuna combinazione ancora.</div>'}</div>
+  <div class="panel" id="ed" ${c?'':'hidden'}></div></div>`;
+ $('add').onclick=newColl;
+ $('view').querySelectorAll('.card').forEach(b=>b.onclick=()=>{UI.sel.collezioni=b.dataset.id;UI.arm=null;vCollezioni();});
+ C.forEach(x=>{const cv=$('view').querySelector(`[data-cv="${x.id}"]`);drawBag(cv,colourById(x.colore),S.manici[x.manico],S.modelli[x.modello]);});
+ if(c)edColl(c);
+}
+function edColl(c){
+ const ed=$('ed');const cols=allColours();const ok=(S.matrice.righe[c.colore]||[]).map(id=>S.manici[id]).filter(Boolean);
+ const man=S.manici[c.manico];const bad=c.manico&&!ok.some(h=>h.id===c.manico);
+ const L=[[!!S.modelli[c.modello],'Modello'],[!!colourById(c.colore),'Tessuto e colore'],[!!man&&!bad,'Manico ammesso']];
+ ed.innerHTML=`<div class="row" style="justify-content:space-between"><h2>${esc(c.nome)}</h2><div class="row"><span class="status savest"></span><button class="b danger" data-key="del-${c.id}" data-label="Elimina" id="del" type="button">Elimina</button></div></div>
+ <div class="grid">
+  <label class="f"><span>Nome</span><input class="i" data-k="nome" data-re="1"></label>
+  <label class="f"><span>Etichetta</span><select class="i" data-k="etichetta" data-re="1">${ETICHETTE.map(e=>`<option>${e}</option>`).join('')}</select></label>
+  <label class="f"><span>Ordine</span><input class="i" data-k="ordine" data-t="num" inputmode="numeric"></label>
+  <label class="f"><span>Modello</span><select class="i" data-k="modello" data-re="1"><option value="">Scegli…</option>${Object.values(S.modelli).sort(byName).map(m=>`<option value="${esc(m.id)}">${esc(m.nome)}</option>`).join('')}</select></label>
+  <label class="f"><span>Tessuto e colore</span><select class="i" data-k="colore" data-re="1"><option value="">Scegli…</option>${Object.values(S.tessuti).sort(byName).map(t=>`<optgroup label="${esc(t.nome)}">${(t.colori||[]).map(k=>`<option value="${esc(k.id)}">${esc(t.nome+' '+k.nome)}</option>`).join('')}</optgroup>`).join('')}</select></label>
+  <label class="f"><span>Manico</span><select class="i" data-k="manico" data-re="1"><option value="">${c.colore?(ok.length?'Scegli…':'Nessun manico ammesso'):'Prima il tessuto'}</option>${ok.sort(byCode).map(h=>`<option value="${esc(h.id)}">${esc((h.codice||h.id)+' · '+(h.descrizione||''))}</option>`).join('')}${bad&&man?`<option value="${esc(man.id)}">${esc(man.codice)} (non ammesso)</option>`:''}</select></label>
+  <label class="f wide"><span>Descrizione</span><input class="i" data-k="descrizione" placeholder="facoltativa"></label>
+ </div>
+ <div class="row small"><span class="muted">Zip:</span>${man&&man.zip&&man.zip.hex?`<span style="width:14px;height:14px;border-radius:50%;background:${esc(man.zip.hex)};border:1px solid var(--line)"></span>${esc(man.zip.nome||man.zip.hex)} (decisa dal manico)`:'<span class="pill warn">da definire nel manico</span>'}</div>
+ ${bad?'<div class="notice warn small">Questo manico non è più ammesso per il tessuto scelto: cambialo o aggiorna gli abbinamenti.</div>':''}
+ <ul class="todo">${L.map(x=>`<li class="${x[0]?'ok':''}">${x[1]}</li>`).join('')}</ul>
+ <label class="tog"><input type="checkbox" data-k="pubblicato" data-t="bool" data-re="1">Pubblicata nel configuratore</label>`;
+ bind(ed,c,'collezioni',c.id,()=>vCollezioni());
+ $('del').onclick=e=>armDelete(e.currentTarget,()=>remove('collezioni',c.id));
+}
+
+// ======================= RICAMO =======================
+const PREVIEW_FONTS={tw_cen:'"Questrial"',castle:'"Cinzel"',cotillion:'"Pinyon Script"'};
+const fontLoaded={};
+async function fontFamily(f){if(f.file&&f.file.id){const fam='ric_'+f.file.id;if(!fontLoaded[fam]){fontLoaded[fam]=(async()=>{try{const ff=new FontFace(fam,`url(${blob(f.file.id)})`);await ff.load();document.fonts.add(ff);return true;}catch(e){return false;}})();}if(await fontLoaded[fam])return `"${fam}"`;}
+ const fb=f.anteprima||PREVIEW_FONTS[f.id]||'"Questrial"';try{await document.fonts.load(`40px ${fb}`);}catch(e){}return fb;}
+function ricSettings(){if(!S.ricamo)S.ricamo=clone(RIC_DEF);return S.ricamo;}
+const RP={modello:'',colore:'',manico:'',font:'',testo:'Giulia',stile:'come scritto'};
+function vRicamo(){
+ const R=ricSettings();R.font=R.font||[];
+ const M=Object.values(S.modelli).filter(m=>m.ricamo&&m.ricamo.attivo).sort(byName);
+ if(!S.modelli[RP.modello]||!S.modelli[RP.modello].ricamo||!S.modelli[RP.modello].ricamo.attivo)RP.modello=M[0]?M[0].id:'';
+ const m=S.modelli[RP.modello];
+ const allowedF=R.font.filter(f=>!m||!(m.ricamo.font||[]).length||m.ricamo.font.includes(f.id));
+ if(!allowedF.some(f=>f.id===RP.font))RP.font=allowedF[0]?allowedF[0].id:'';
+ const cols=allColours();if(!cols.some(c=>c.id===RP.colore))RP.colore=(cols.find(c=>(S.matrice.righe[c.id]||[]).length)||cols[0]||{}).id||'';
+ const okH=(S.matrice.righe[RP.colore]||[]).map(id=>S.manici[id]).filter(Boolean);if(!okH.some(h=>h.id===RP.manico))RP.manico=okH[0]?okH[0].id:'';
+ $('view').innerHTML=`<div style="display:flex;flex-direction:column;gap:18px">
+ <div class="emb">
+  <div class="panel" style="gap:12px">
+   <div class="row" style="justify-content:space-between"><h2>Prova del ricamo</h2><span class="muted small">come lo vedrà il cliente</span></div>
+   <canvas id="ecv" width="1200" height="560" aria-label="Anteprima del ricamo"></canvas>
+   <div id="emsg" class="small" aria-live="polite"></div>
+  </div>
+  <div class="panel" style="gap:14px">
+   <label class="f"><span>Modello</span><select class="i" id="rm">${M.map(x=>`<option value="${esc(x.id)}" ${x.id===RP.modello?'selected':''}>${esc(x.nome)} · zona ${String(x.ricamo.larghezza||'?').replace('.',',')} × ${String(x.ricamo.altezza||'?').replace('.',',')} cm</option>`).join('')||'<option value="">Nessun modello con il ricamo</option>'}</select></label>
+   <label class="f"><span>Tessuto</span><select class="i" id="rc">${Object.values(S.tessuti).sort(byName).map(t=>`<optgroup label="${esc(t.nome)}">${(t.colori||[]).map(k=>`<option value="${esc(k.id)}" ${k.id===RP.colore?'selected':''}>${esc(t.nome+' '+k.nome)}</option>`).join('')}</optgroup>`).join('')}</select></label>
+   <label class="f"><span>Manico (decide il colore del filo)</span><select class="i" id="rh">${okH.map(h=>`<option value="${esc(h.id)}" ${h.id===RP.manico?'selected':''}>${esc(h.codice)} · zip ${esc(h.zip&&h.zip.nome||h.zip&&h.zip.hex||'da definire')}</option>`).join('')||'<option value="">Nessun manico ammesso</option>'}</select></label>
+   <div class="f"><span class="small muted">Font</span><div class="fonts" id="rf">${allowedF.map(f=>`<button type="button" data-f="${esc(f.id)}" aria-pressed="${f.id===RP.font}" data-ff="${esc(f.id)}">${esc(f.nome)}</button>`).join('')||'<span class="muted small">Nessun font</span>'}</div></div>
+   <label class="f"><span>Testo</span><input class="i" id="rt" value="${esc(RP.testo)}" maxlength="${m?(+m.ricamo.maxCaratteri||30)*(+m.ricamo.righe||1)+((+m.ricamo.righe||1)-1):30}" autocomplete="off"></label>
+   <div class="f"><span class="small muted">Prezzo che va nel carrello</span><div class="price" id="rp"></div></div>
+  </div>
+ </div>
+ <div class="panel">
+  <div class="row" style="justify-content:space-between"><h2>Impostazioni del ricamo</h2><span class="status savest"></span></div>
+  <div class="grid">
+   <label class="f"><span>Prezzo standard del ricamo (€)</span><input class="i" data-k="prezzo" data-t="num" inputmode="decimal" placeholder="es. 10"></label>
+   <label class="f"><span>Lettere alte almeno (cm)</span><input class="i" data-k="altezzaMin" data-t="num" inputmode="decimal"></label>
+   <label class="f"><span>Lettere alte al massimo (cm)</span><input class="i" data-k="altezzaMax" data-t="num" inputmode="decimal"></label>
+  </div>
+  <div class="spec">Il colore del filo è sempre quello della zip, che dipende dal manico. Ogni modello ha la sua zona e il suo numero di caratteri, nella scheda Modelli. Per vedere il font vero, carica il suo file (TTF, OTF o WOFF); finché non c’è, l’anteprima usa un font simile.</div>
+  <div class="rows" id="flist">${R.font.map((f,i)=>`<div class="r" data-fi="${i}" style="border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--bg)">
+    <span style="font-size:1.6rem;flex:0 0 150px;overflow:hidden;white-space:nowrap" data-fs="${i}">${esc(f.esempio||'Aa Bb')}</span>
+    <div class="f" style="flex:1 1 130px"><span>Nome</span><input class="i" data-ff="nome" value="${esc(f.nome)}"></div>
+    <div class="f" style="flex:1 1 160px"><span>Stili</span><input class="i" data-ff="stili" value="${esc((f.stili||[]).join(', '))}" placeholder="maiuscolo, minuscolo, iniziali"></div>
+    <div class="slots" style="flex:1 1 230px" data-fslot="${i}">${slotHTML('font'+i,'File del font',f.file,{accept:'.ttf,.otf,.woff,.woff2,font/*',sub:f.file?'':'anteprima con un font simile'})}</div>
+    <button class="b sm danger" data-key="delf-${i}" data-label="Togli" data-fdel="${i}" type="button">Togli</button></div>`).join('')}</div>
+  <div class="row"><button class="b" id="fadd" type="button" ${R.font.length>=6?'disabled':''}>+ Font</button></div>
+ </div></div>`;
+ bind($('view').querySelectorAll('.panel')[2],R,'impostazioni','ricamo',()=>vRicamo());
+ sideFn=()=>drawEmb();
+ $('rm').onchange=e=>{RP.modello=e.target.value;vRicamo();};
+ $('rc').onchange=e=>{RP.colore=e.target.value;vRicamo();};
+ $('rh').onchange=e=>{RP.manico=e.target.value;drawEmb();};
+ $('rt').oninput=e=>{RP.testo=e.target.value;drawEmb();};
+ $('rf').querySelectorAll('button').forEach(b=>b.onclick=()=>{RP.font=b.dataset.f;$('rf').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));drawEmb();});
+ R.font.forEach(async(f,i)=>{const fam=await fontFamily(f);const e=$('view').querySelector(`[data-fs="${i}"]`);if(e)e.style.fontFamily=fam;const bt=$('rf').querySelector(`[data-ff="${CSS.escape(f.id)}"]`);if(bt)bt.style.fontFamily=fam;});
+ $('flist').querySelectorAll('[data-fi]').forEach(r=>{const i=+r.dataset.fi,f=R.font[i];
+  r.querySelectorAll('input[data-ff]').forEach(el=>el.oninput=()=>{if(el.dataset.ff==='stili')f.stili=el.value.split(',').map(s=>s.trim()).filter(Boolean);else f.nome=el.value;touch('impostazioni','ricamo');});
+  r.querySelector('[data-fdel]').onclick=e=>armDelete(e.currentTarget,()=>{R.font.splice(i,1);touch('impostazioni','ricamo');vRicamo();});
+  wireSlots(r.querySelector('[data-fslot]'),()=>'font',null,(k,file)=>{f.file=file;touch('impostazioni','ricamo');vRicamo();});});
+ $('fadd').onclick=()=>{R.font.push({id:'f_'+Date.now().toString(36),nome:'Nuovo font',stili:[],file:null});touch('impostazioni','ricamo');vRicamo();};
+ drawEmb();
+}
+let embTok=0;
+async function drawEmb(){
+ const tok=++embTok;const cv=$('ecv');if(!cv)return;const x=cv.getContext('2d',{willReadFrequently:true});const W=cv.width,H=cv.height;
+ const R=ricSettings(),m=S.modelli[RP.modello],col=colourById(RP.colore),man=S.manici[RP.manico],f=(R.font||[]).find(z=>z.id===RP.font);
+ const msg=$('emsg');const thread=(man&&man.zip&&/^#[0-9a-f]{6}$/i.test(man.zip.hex||''))?man.zip.hex:'#d8c9a6';
+ const zw=m&&+m.ricamo.larghezza||10,zh=m&&+m.ricamo.altezza||3,righe=m&&+m.ricamo.righe||1,maxC=m&&+m.ricamo.maxCaratteri||20;
+ const pxcm=Math.min(W/(zw+4),H/(zh+3));const ox=(W-zw*pxcm)/2,oy=(H-zh*pxcm)/2;
+ // tessuto a grandezza reale: la scansione copre larghezzaCm
+ const fam=col&&col.t;const scanCm=fam&&+fam.larghezzaCm||20;const im=await loadImg(col&&(col.foto&&col.foto.id||fam&&fam.neutro&&fam.neutro.id));
+ if(tok!==embTok)return;
+ await paintFabric(x,W,H,col,fam,im?(scanCm*pxcm)/im.width:1);
+ if(tok!==embTok)return;
+ // zona
+ x.save();x.setLineDash([10,8]);x.strokeStyle='rgba(255,255,255,.55)';x.lineWidth=2;x.strokeRect(ox,oy,zw*pxcm,zh*pxcm);x.restore();
+ x.fillStyle='rgba(255,255,255,.7)';x.font='500 20px "JetBrains Mono",monospace';x.fillText(`zona ${String(zw).replace('.',',')} × ${String(zh).replace('.',',')} cm`,ox,oy-12);
+ const fam2=f?await fontFamily(f):'"Questrial"';if(tok!==embTok)return;
+ let lines=(RP.testo||'').split(/\n/);if(righe===1)lines=[lines.join(' ')];
+ // a capo automatico su due righe se serve
+ if(righe===2&&lines.length===1&&lines[0].includes(' ')&&lines[0].length>maxC){const w=lines[0].split(' ');const half=Math.ceil(w.length/2);lines=[w.slice(0,half).join(' '),w.slice(half).join(' ')];}
+ lines=lines.slice(0,righe).map(s=>s.trim()).filter(Boolean);
+ const warn=[];let ok=true;
+ const tooLong=lines.find(l=>l.length>maxC);if(tooLong){warn.push(['bad',`Al massimo ${maxC} caratteri per riga su questo modello.`]);ok=false;}
+ if(!lines.length){msg.innerHTML='<span class="muted">Scrivi un testo per vedere il ricamo.</span>';$('rp').textContent='—';return;}
+ // misura: altezza lettera ≈ 0,7 × corpo del font
+ const gap=.25;const maxLetter=Math.min(+R.altezzaMax||3,(zh/(lines.length+(lines.length-1)*gap))*0.95);
+ x.font=`100px ${fam2}`;const widest=Math.max(...lines.map(l=>x.measureText(l).width));
+ let sizePx=Math.min(maxLetter*pxcm/0.7,100*(zw*pxcm*.96)/widest);
+ const letterCm=sizePx*0.7/pxcm;const minL=+R.altezzaMin||0.8;
+ if(letterCm<minL-1e-6){warn.push(['bad',`Il testo è troppo lungo per questa borsa: le lettere verrebbero alte ${letterCm.toFixed(1).replace('.',',')} cm, il minimo è ${String(minL).replace('.',',')} cm. Accorcialo o usa le iniziali.`]);ok=false;}
+ else warn.push(['ok',`Lettere alte ${letterCm.toFixed(1).replace('.',',')} cm · ${lines.length} ${lines.length===1?'riga':'righe'} · filo ${man&&man.zip?esc(man.zip.nome||man.zip.hex):'da definire'}`]);
+ // maschera del testo
+ const mk=document.createElement('canvas');mk.width=W;mk.height=H;const k=mk.getContext('2d');k.fillStyle='#000';k.textAlign='center';k.textBaseline='middle';k.font=`${sizePx}px ${fam2}`;
+ const lh=sizePx*.7*(1+gap)+sizePx*.0;const total=lh*(lines.length-1);lines.forEach((l,i)=>k.fillText(l,W/2,H/2-total/2+i*lh));
+ // punto pieno: filo diagonale con riflessi
+ const st=document.createElement('canvas');st.width=W;st.height=H;const s=st.getContext('2d');const [r,g,b]=hx(thread);
+ s.fillStyle=thread;s.fillRect(0,0,W,H);
+ const step=Math.max(2.2,sizePx/34);s.lineWidth=step*.55;
+ for(let d=-H;d<W;d+=step){s.strokeStyle=`rgba(255,255,255,${.09+.05*Math.sin(d*.7)})`;s.beginPath();s.moveTo(d,H);s.lineTo(d+H*.55,0);s.stroke();}
+ for(let d=-H+step/2;d<W;d+=step){s.strokeStyle='rgba(0,0,0,.12)';s.lineWidth=step*.14;s.beginPath();s.moveTo(d,H);s.lineTo(d+H*.55,0);s.stroke();}
+ s.globalCompositeOperation='destination-in';s.drawImage(mk,0,0);
+ // ombra sotto il filo e rilievo
+ x.save();x.globalAlpha=.45;x.filter=`blur(${Math.max(1,sizePx/40)}px)`;x.drawImage(mk,sizePx*.02,sizePx*.035);x.restore();
+ x.drawImage(st,0,0);
+ const hl=document.createElement('canvas');hl.width=W;hl.height=H;const hc=hl.getContext('2d');hc.drawImage(mk,0,0);hc.globalCompositeOperation='source-in';const gr=hc.createLinearGradient(0,H/2-sizePx/2,0,H/2+sizePx/2);gr.addColorStop(0,'rgba(255,255,255,.28)');gr.addColorStop(.5,'rgba(255,255,255,0)');gr.addColorStop(1,'rgba(0,0,0,.25)');hc.fillStyle=gr;hc.fillRect(0,0,W,H);x.drawImage(hl,0,0);
+ if(!ok){x.fillStyle='rgba(168,36,58,.12)';x.fillRect(0,0,W,H);}
+ msg.innerHTML=warn.map(w=>`<div class="status ${w[0]}">${w[1]}</div>`).join('')+(!m?'<div class="status warn">Nessun modello con il ricamo attivo: accendilo nella scheda Modelli.</div>':'');
+ const p=m&&m.ricamo.prezzo!==''&&m.ricamo.prezzo!=null?m.ricamo.prezzo:R.prezzo;$('rp').textContent=ok?'+ '+eur(p):'—';
+}
+
+// ---------- avvio ----------
+try{const h=(location.hash||'').slice(1);if(TABS.some(t=>t[0]===h))UI.tab=h;}catch(e){}
+render();
+(async()=>{
+ db=await claude.use('db');assets=await claude.use('assets');user=await claude.use('user');
+ if(!db){$('offline').hidden=false;$('offline').textContent='L’archivio si apre e si salva solo da claude.ai con il tuo account. In questa vista non vedo i dati salvati.';return;}
+ if(!assets){$('offline').hidden=false;$('offline').textContent='In questa vista non posso caricare file: apri l’archivio da claude.ai come proprietario o editor.';}
+ try{const c=user&&user.can?user.can('data.write'):null;if(c===false){canWrite=false;$('offline').hidden=false;$('offline').textContent='Puoi guardare l’archivio ma non modificarlo.';}}catch(e){}
+ const onCol=col=>qs=>{qs.docs.forEach(d=>{if(UI.dirty[col+'/'+d.id])return;const v=d.data();if(v)S[col][d.id]=clone(v);});
+  Object.keys(S[col]).forEach(id=>{if(!qs.docs.some(d=>d.id===id)&&!UI.dirty[col+'/'+id])delete S[col][id];});rerender();};
+ ['modelli','tessuti','manici','collezioni'].forEach(col=>db.collection(col).onSnapshot(onCol(col),e=>showErr(e)));
+ db.doc('abbinamenti/matrice').onSnapshot(s=>{if(UI.dirty['abbinamenti/matrice'])return;S.matrice=s.exists?clone(s.data()):{righe:{}};S.matrice.righe=S.matrice.righe||{};rerender();},showErr);
+ db.doc('impostazioni/ricamo').onSnapshot(s=>{if(UI.dirty['impostazioni/ricamo'])return;S.ricamo=s.exists?clone(s.data()):clone(RIC_DEF);rerender();},showErr);
+})();
+function showErr(e){$('offline').hidden=false;$('offline').textContent='Non riesco a leggere l’archivio ('+(e&&e.code||'errore')+'). Ricarica la pagina.';}
+// ridisegna solo se non stai scrivendo in un campo
+let rrT=null;function rerender(){clearTimeout(rrT);rrT=setTimeout(()=>{const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&$('view').contains(a)){renderCounts();renderTabs();return;}render();},120);}
+</script>
