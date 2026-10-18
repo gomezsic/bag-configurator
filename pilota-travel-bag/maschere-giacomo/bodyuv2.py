@@ -79,10 +79,10 @@ ex=(dx*ax_minor[0]+dy*ax_minor[1])/a_;ey=(dx*ax_major[0]+dy*ax_major[1])/b_
 if ax_major[1]<0:ey=-ey
 r=np.sqrt(ex**2+ey**2)
 # fianco: disco di raggio reale uguale al corpo (Rpx), stessa scala del fronte (1,25 unità per pixel di raggio), trama girata di 90°
-shc=(0.74+0.20*np.sqrt(np.clip(1-r**2,0,1)))*(0.95-0.12*ey)
+shc=1.18*(0.74+0.20*np.sqrt(np.clip(1-r**2,0,1)))*(0.95-0.12*ey)
 print('fianco centro',round(cx),round(cy),'semiassi',round(a_),round(b_))
 # lo scorcio vero schiaccerebbe la trama di 3,4 volte e la farebbe sembrare un altro tessuto: la teniamo con la stessa densità a schermo del fronte
-Uc=ey*Rpx*1.25+3000;Vc=ex*Rpx*1.25*0.36+3000
+Uc=ey*Rpx*1.25*0.89+3000;Vc=ex*Rpx*1.25*0.36*0.89+3000
 body=np.clip(np.maximum(np.maximum(fr,so),fi),0,1)
 # chiudi le fessure di 1-3 px tra un pezzo e l'altro
 closed=ndimage.grey_closing(body,size=(7,7))
