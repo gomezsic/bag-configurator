@@ -247,7 +247,7 @@ function checkFile(kind,info,file,ctx){
  const out=[];const t=(file&&file.type)||'';
  if(!info){out.push(['warn','Non riesco a leggere le misure di questo file (TIFF?). Va bene lo stesso, lo controllo io.']);return out;}
  const dim=`${info.w} × ${info.h} px`;
- if(kind==='foto'){if(info.w===STD.foto&&info.h===STD.foto)out.push(['ok',dim+', tela giusta']);else out.push(['warn',`${dim}: la tela dev'essere ${STD.foto} × ${STD.foto} px`]);
+ if(kind==='foto'){if(Math.min(info.w,info.h)>=1000)out.push(['ok',dim+(info.w===STD.foto&&info.h===STD.foto?', tela standard':', va bene: i livelli devono avere la stessa misura')]);else out.push(['warn',`${dim}: troppo piccola, serve almeno 1000 px per lato (meglio ${STD.foto})`]);
   if(info.sat>.12)out.push(['warn','La foto sembra colorata: serve neutra (tessuto chiaro, manici bianchi)']);}
  if(kind==='livello'){const f=ctx&&ctx.foto;if(f&&f.w&&(info.w!==f.w||info.h!==f.h))out.push(['bad',`${dim}: non è la stessa tela della foto (${f.w} × ${f.h})`]);else out.push(['ok',dim]);
   if(!/png/.test(t))out.push(['warn','Serve PNG con trasparenza']);else if(info.alpha<.02)out.push(['warn','Non vedo trasparenza: esporta solo il pezzo, il resto trasparente']);}
@@ -268,7 +268,7 @@ async function uploadTo(file,kind,ctx){
 }
 function slotHTML(key,label,f,o={}){
  const cls='slot'+(f?' has':'')+(o.req?' req':'');
- const msgs=f?(f.note||[]):[];
+ const msgs=f?(f.note||[]).map(m=>/la tela dev'essere/.test(m[1])&&Math.min(f.w||0,f.h||0)>=1000?['ok',`${f.w} × ${f.h} px, va bene: i livelli devono avere la stessa misura`]:m):[];
  return `<div class="${cls}" data-slot="${esc(key)}">
   <div class="pv">${f?(/image\/(png|jpe?g|webp|gif)/.test(f.tipo||'image/png')?`<img src="${blob(f.id)}" alt="">`:esc((f.tipo||'').split('/')[1]||'file')):'vuoto'}</div>
   <div class="meta"><div class="nm">${esc(label)}${o.req?'':' <span class="muted small">(facoltativo)</span>'}</div>
@@ -315,7 +315,7 @@ function modelCheck(m){
  L.push([!!(m.nome&&m.tipo),'Nome e tipo di borsa']);
  L.push([!!(m.misure&&m.misure.L&&m.misure.H),'Misure (almeno larghezza e altezza)']);
  if(!v.length)L.push([false,'Almeno una vista della borsa']);
- v.forEach(vi=>{const n=vi.nome||'vista';L.push([!!vi.foto,`${n}: foto neutra 2400 × 2400 px`]);
+ v.forEach(vi=>{const n=vi.nome||'vista';L.push([!!vi.foto,`${n}: foto neutra`]);
   LAYERS.filter(l=>l.req||(l.ric&&m.ricamo&&m.ricamo.attivo)).forEach(l=>{if(l.k==='zip'&&m.senzaZip)return;if(l.k.startsWith('manico')&&m.senzaManici)return;L.push([!!(vi.livelli&&vi.livelli[l.k]),`${n}: livello ${l.k}`]);});});
  L.push([m.prezzo!==''&&m.prezzo!=null,'Prezzo base']);
  if(m.ricamo&&m.ricamo.attivo)L.push([!!(m.ricamo.larghezza&&m.ricamo.altezza),'Ricamo: misure della zona']);
@@ -364,10 +364,10 @@ function edModello(m){
  </section>
 
  <section class="step"><h3><span class="num">2</span>Foto neutra e scontorni<span class="aside">${m.viste.length} ${m.viste.length===1?'vista':'viste'}</span></h3>
-  <div class="spec">Per ogni vista: <b>una foto neutra</b> (PNG, tela <b>2400 × 2400 px</b>, sfondo bianco, tessuto chiaro e manici bianchi) e <b>un PNG per ogni livello</b>, sulla stessa tela, con tutto il resto trasparente. In Photoshop: <i>File › Esporta › Livelli in file</i>, formato PNG-24 con trasparenza. Il nome del livello è scritto sotto ogni casella.</div>
+  <div class="spec">Per ogni vista: <b>una foto neutra</b> (PNG o JPG, tela quadrata di almeno 1000 px per lato, meglio <b>2400 × 2400 px</b>, sfondo bianco, tessuto chiaro e manici bianchi) e <b>un PNG per ogni livello</b>, sulla stessa tela, con tutto il resto trasparente. In Photoshop: <i>File › Esporta › Livelli in file</i>, formato PNG-24 con trasparenza. Il nome del livello è scritto sotto ogni casella.</div>
   <div class="row" id="vtabs">${m.viste.map(v=>`<button class="b ${v===vi?'primary':''}" data-v="${v.id}" type="button">${esc(v.nome||'vista')}</button>`).join('')}<button class="b" id="vadd" type="button">+ Vista</button></div>
   ${vi?`<div class="row"><label class="f" style="flex:1 1 200px"><span>Nome della vista</span><input class="i" id="vname" value="${esc(vi.nome)}"></label>${m.viste.length>1?`<button class="b danger" data-key="delv-${vi.id}" data-label="Togli questa vista" id="vdel" type="button" style="align-self:end">Togli questa vista</button>`:''}</div>
-  <div class="slots" id="vfoto">${slotHTML('foto','Foto neutra',vi.foto,{req:1,sub:'foto.png · 2400 × 2400'})}</div>
+  <div class="slots" id="vfoto">${slotHTML('foto','Foto neutra',vi.foto,{req:1,sub:'foto neutra'})}</div>
   <div class="slots" id="vliv">${LAYERS.filter(l=>!(l.ric&&!m.ricamo.attivo)&&!(l.k==='zip'&&m.senzaZip)&&!(l.k.startsWith('manico')&&m.senzaManici)).map(l=>slotHTML(l.k,l.l,vi.livelli&&vi.livelli[l.k],{req:l.req||l.ric,sub:l.k+'.png',accept:'image/png'})).join('')}
    ${(vi.extra||[]).map(k=>slotHTML(k,'Livello in più',vi.livelli&&vi.livelli[k],{sub:k+'.png',accept:'image/png'})).join('')}</div>
   <div class="row"><label class="f" style="flex:1 1 200px"><span>Altro livello (nome)</span><input class="i" id="xname" placeholder="es. tasca_frontale"></label><button class="b" id="xadd" type="button" style="align-self:end">+ Aggiungi livello</button></div>`:''}
