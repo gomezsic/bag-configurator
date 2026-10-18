@@ -1,0 +1,180 @@
+<title>Pilota Travel Bag</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: immagine grande a sinistra, pannello scelte a destra; una colonna su telefono */
+:root{
+  --bg:#f4f5f8; --surface:#ffffff; --fg:#141a2b; --muted:#5a6275; --line:#d9dce5;
+  --accent:#1b3f99; --accent-soft:#e3e9f8;
+  --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --body:"Instrument Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f131d; --surface:#171c29; --fg:#e8ebf3; --muted:#9aa2b6; --line:#2a3142;
+  --accent:#8fb0ff; --accent-soft:#1d2842; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f131d; --surface:#171c29; --fg:#e8ebf3; --muted:#9aa2b6; --line:#2a3142;
+  --accent:#8fb0ff; --accent-soft:#1d2842; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1{font:700 clamp(1.8rem,4vw,2.6rem)/1.1 var(--display);margin:0;text-wrap:balance}
+.eyebrow{font:500 .75rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+p{margin:0 0 10px;max-width:70ch}
+.muted{color:var(--muted)}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+@media (max-width:860px){.lab{grid-template-columns:1fr}}
+.stage{background:#fff;border-radius:6px;overflow:hidden;border:1px solid var(--line);position:relative}
+.stage canvas{display:block;width:100%;height:auto;aspect-ratio:1174/1179;max-width:100%}
+.badge{position:absolute;left:10px;top:10px;font:500 .72rem var(--mono);background:rgba(20,26,43,.82);color:#fff;padding:4px 8px;border-radius:3px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:18px}
+.panel h3{margin:0 0 8px;font:500 .75rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.sw{width:40px;height:40px;border-radius:4px;border:2px solid transparent;cursor:pointer;position:relative;padding:0}
+.sw span{position:absolute;right:2px;bottom:1px;font:600 .64rem var(--mono);color:#fff;text-shadow:0 0 3px #000}
+.sw[aria-pressed="true"]{border-color:var(--accent);outline:2px solid var(--surface);outline-offset:-4px}
+.sw:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.name{font-size:.85rem;color:var(--muted);margin-top:6px;min-height:1.3em}
+label.row{display:flex;justify-content:space-between;gap:10px;font-size:.9rem;align-items:center;cursor:pointer}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.notes div{border-top:3px solid var(--accent);padding-top:10px;min-width:0}
+.notes b{font-family:var(--display);font-weight:500;font-size:1.05rem;display:block;margin-bottom:4px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">QG Bags · pilota sui tuoi livelli</div>
+    <h1>Travel Bag vestita in tempo reale</h1>
+    <p class="muted" style="margin-top:12px">Foto neutra, scontorni e tessuto sono i tuoi file. Le righe dei manici sono generate da una riga di dati e scorrono lungo la linea centrale calcolata dallo scontorno. Prova i manici, poi attiva il confronto con il manico 39 di oggi.</p>
+  </header>
+
+  <div class="lab">
+    <div class="stage"><canvas id="cv" width="1174" height="1179" aria-label="Travel Bag con tessuto, zip e manici scelti"></canvas><div class="badge" id="badge">nuovo motore</div></div>
+    <div class="panel">
+      <div><h3>Tessuto (tile 710 ricolorato)</h3><div class="chips" id="fabrics"></div><div class="name" id="fabname"></div></div>
+      <div><h3>Manici</h3><div class="chips" id="handles"></div><div class="name" id="hname"></div></div>
+      <div><h3>Zip</h3><div class="chips" id="zips"></div></div>
+      <label class="row" for="cmp"><span>Mostra il manico 39 attuale</span><input type="checkbox" id="cmp"></label>
+      <label class="row" for="uvv"><span>Mostra le mappe UV (corpo e manici)</span><input type="checkbox" id="uvv"></label>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div><b>Cosa ho usato</b>Travel_neutra, lo scontorno di handle-39 (solo il contorno, non i colori), lo scontorno della zip e il livello dylan-710 come fonte del tile.</div>
+    <div><b>Corpo a sezioni</b>Il fronte e la parte alta seguono la curvatura del cilindro, con la trama che si stringe dove la superficie gira. La testata ha un taglio ruotato. Alle ombre della foto si aggiungono la luce sulla rotondità e l’ombra dei manici sul tessuto.</div>
+    <div><b>Cosa è automatico</b>Le linee centrali partono da pochi punti messi a mano e si centrano da sole sullo scontorno. Da lì esce una mappa UV per pixel, calcolata una volta per questa borsa.</div>
+    <div><b>Cosa migliora con i file veri</b>Il tile qui è ricavato dal tessuto già applicato, quindi ha qualche giuntura. Con la scansione del tessuto e del nastro reale la trama sarà più nitida.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+const IMG={base:"__BASE__",uv:"__UV__",masks:"__MASKS__",tile:"__TILE__",orig:"__ORIG__",ba:"__BODYA__",bb:"__BODYB__"};
+const FABRICS=[["Dylan 710","#00becc"],["Blu notte","#1d2a55"],["Prugna","#5a2346"],["Militare","#5f6440"],["Beige","#c9a77a"],["Bordeaux","#7a1a2a"],["Ottanio","#0f5a66"]];
+const HANDLES={
+ "39":[["#151515",1],["#d0246f",1.2],["#151515",1]],
+ "101":[["#7b4fd6",1],["#6b3a1c",1],["#0f5560",1]],
+ "56":[["#232a44",.12],["#2c6a3a",1],["#ff2f8a",1],["#d1a670",1],["#7c1622",1],["#232a44",.12]],
+ "90":[["#141a26",1],["#6e3c1a",1],["#141a26",1]],
+ "15":[["#13405a",3],["#e9d39a",1],["#4f5428",2],["#e9d39a",1],["#13405a",3]],
+ "81":[["#1a3fd0",1],["#6e3c1a",1],["#1a3fd0",1]],
+ "10":[["#6e1420",2.7],["#f0de96",1],["#154a66",2.6],["#f0de96",1],["#6e1420",2.7]],
+ "14":[["#121a2a",2.5],["#ead7a2",1.3],["#6a1a22",2.4],["#ead7a2",1.3],["#121a2a",2.5]],
+ "11":[["#121a2a",2.7],["#ecd8a0",1.1],["#3e4a24",2.4],["#ecd8a0",1.1],["#121a2a",2.7]],
+ "tinta unita":[["#1d2a55",1]]
+};
+const ZIPS=[["Fucsia","#fc1680"],["Bianco","#f2f0ea"],["Nero","#1a1a1a"],["Blu","#1a3fd0"],["Verde","#2c6a3a"],["Ottone","#b08d4a"]];
+const st={fab:0,h:"39",zip:0,cmp:false,uv:false};
+
+const cv=document.getElementById('cv');
+const gl=cv.getContext('webgl',{preserveDrawingBuffer:true,premultipliedAlpha:false});
+if(!gl){cv.replaceWith(Object.assign(document.createElement('p'),{textContent:'WebGL non disponibile su questo dispositivo.'}));return;}
+const VS=`attribute vec2 p;varying vec2 t;void main(){t=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0,1);}`;
+const FS=`precision highp float;varying vec2 t;
+uniform sampler2D uBase,uUV,uMask,uTile,uBands,uOrig,uBodyA,uBodyB;uniform vec3 uFab,uZip;uniform float uCmp,uShowUV;
+const vec2 SZ=vec2(1174.,1179.);
+float d16(vec4 q){return (q.r*255.*256.+q.g*255.)/16.;}
+float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+vec3 strap(vec2 tt,float Lb){
+ vec4 q=texture2D(uUV,tt);float u=q.r;float along=(q.g*255.*256.+q.b*255.)/16.;
+ float across=u*46.;
+ float tw=fract((across*.95+along)/3.0);float ridge=smoothstep(0.,.45,tw)*smoothstep(1.,.55,tw);
+ float yarn=h2(floor(vec2(across*.9+along,along-across)/1.5));
+ float uj=clamp(u+(ridge-.5)*.004,0.,1.);
+ vec3 band=texture2D(uBands,vec2(uj,.5)).rgb;
+ band=band*(.78+.28*ridge+.07*(yarn-.5))+vec3(.05*ridge);
+ float selv=smoothstep(.0,.05,u)*smoothstep(1.,.95,u);band*=.75+.25*selv;
+ float prof=.72+.28*pow(sin(3.14159*u),.6);
+ float hs=pow(clamp(Lb/.84,0.,1.3),1.5);
+ return band*prof*hs;}
+void main(){
+ vec2 px=t*SZ;vec3 base=texture2D(uBase,t).rgb;float Lb=dot(base,vec3(.3333));
+ vec4 m=texture2D(uMask,t);vec3 col=base;
+ // corpo: coordinate del taglio (fronte avvolto sul cilindro, testata ruotata)
+ vec4 qa=texture2D(uBodyA,t),qb=texture2D(uBodyB,t);
+ vec2 st=vec2(d16(qa),d16(qb));float ao=qa.b;float syn=qb.b*255./160.;
+ float det=texture2D(uTile,st/160.).r;
+ float ps=pow(clamp(Lb/.80,0.,1.3),1.7);
+ vec3 alb=uFab*(.62+.76*det);
+ vec3 body=alb*ps*syn*.92*(1.-.5*ao);
+ body+=vec3(.035)*pow(syn,5.);
+ col=mix(col,body,m.g);
+ col=mix(col,uZip*pow(clamp(Lb/.82,0.,1.3),1.4)*(1.-.4*ao),m.b);
+ // manici: 4 campioni per pixel per bordi delle righe puliti
+ vec2 e=.5/SZ;
+ vec3 h=.25*(strap(t+vec2(-e.x,-e.y),Lb)+strap(t+vec2(e.x,-e.y),Lb)+strap(t+vec2(-e.x,e.y),Lb)+strap(t+vec2(e.x,e.y),Lb));
+ float ha=m.r;
+ if(uShowUV>.5){vec4 q=texture2D(uUV,t);float along=(q.g*255.*256.+q.b*255.)/16.;h=vec3(q.r,step(.5,fract(along/24.))*.8,.15);
+   col=mix(col,vec3(step(.5,fract(st.x/40.)),step(.5,fract(st.y/40.)),.3)*syn,m.g);}
+ if(uCmp>.5){vec4 o=texture2D(uOrig,t);h=o.rgb;ha=o.a;}
+ col=mix(col,h,ha);
+ gl_FragColor=vec4(col,1.);}`;
+function sh(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(s);return s;}
+const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);gl.useProgram(pr);
+const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+const loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
+gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL,gl.NONE);
+function tex(unit,name,src,opt){const tx=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,tx);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,src);
+  const f=opt.nearest?gl.NEAREST:gl.LINEAR,w=opt.repeat?gl.REPEAT:gl.CLAMP_TO_EDGE;
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,f);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,f);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,w);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,w);
+  gl.uniform1i(gl.getUniformLocation(pr,name),unit);return tx;}
+const bandCanvas=document.createElement('canvas');bandCanvas.width=512;bandCanvas.height=1;const bctx=bandCanvas.getContext('2d');
+let bandTex=null;
+function setBands(spec){const tot=spec.reduce((a,b)=>a+b[1],0);let x=0;spec.forEach(([c,w])=>{const ww=w/tot*512;bctx.fillStyle=c;bctx.fillRect(Math.floor(x),0,Math.ceil(ww)+1,1);x+=ww;});
+  gl.activeTexture(gl.TEXTURE4);if(!bandTex){bandTex=tex(4,'uBands',bandCanvas,{});}else{gl.bindTexture(gl.TEXTURE_2D,bandTex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,bandCanvas);}}
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);
+// i colori dei tessuti e della zip sono sRGB: lavoriamo direttamente in sRGB come in Photoshop "Moltiplica"
+let ready=false;
+function draw(){if(!ready)return;
+  gl.uniform3fv(gl.getUniformLocation(pr,'uFab'),hex(FABRICS[st.fab][1]));
+  gl.uniform3fv(gl.getUniformLocation(pr,'uZip'),hex(ZIPS[st.zip][1]));
+  gl.uniform1f(gl.getUniformLocation(pr,'uCmp'),st.cmp?1:0);gl.uniform1f(gl.getUniformLocation(pr,'uShowUV'),st.uv?1:0);
+  gl.viewport(0,0,cv.width,cv.height);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);}
+function load(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
+Promise.all(['base','uv','masks','tile','orig','ba','bb'].map(k=>load(IMG[k]))).then(([b,u,m,t,o,ba,bb])=>{
+  tex(0,'uBase',b,{});tex(1,'uUV',u,{nearest:true});tex(2,'uMask',m,{});tex(3,'uTile',t,{repeat:true});tex(5,'uOrig',o,{});tex(6,'uBodyA',ba,{nearest:true});tex(7,'uBodyB',bb,{nearest:true});
+  setBands(HANDLES[st.h]);ready=true;sync();});
+
+function chips(el,items,key,label,style){items.forEach((it,i)=>{const b=document.createElement('button');b.type='button';b.className='sw';b.id=key+'-'+i;
+  b.style.background=style(it);b.setAttribute('aria-label',label(it));b.innerHTML=key==='h'?'<span>'+it[0]+'</span>':'';
+  b.onclick=()=>{st[key]=key==='h'?it[0]:i;sync();};el.appendChild(b);});}
+const grad=spec=>{const tot=spec.reduce((a,b)=>a+b[1],0);let acc=0;return 'linear-gradient(90deg,'+spec.map(([c,w])=>{const a=acc/tot*100;acc+=w;return c+' '+a.toFixed(1)+'% '+(acc/tot*100).toFixed(1)+'%';}).join(',')+')';};
+chips(document.getElementById('fabrics'),FABRICS,'fab',f=>f[0],f=>f[1]);
+chips(document.getElementById('handles'),Object.entries(HANDLES),'h',h=>'Manico '+h[0],h=>grad(h[1]));
+chips(document.getElementById('zips'),ZIPS,'zip',z=>'Zip '+z[0],z=>z[1]);
+document.getElementById('cmp').onchange=e=>{st.cmp=e.target.checked;sync();};
+document.getElementById('uvv').onchange=e=>{st.uv=e.target.checked;sync();};
+function sync(){
+  document.querySelectorAll('#fabrics .sw').forEach((b,i)=>b.setAttribute('aria-pressed',i===st.fab));
+  document.querySelectorAll('#zips .sw').forEach((b,i)=>b.setAttribute('aria-pressed',i===st.zip));
+  document.querySelectorAll('#handles .sw').forEach((b,i)=>b.setAttribute('aria-pressed',Object.keys(HANDLES)[i]===st.h));
+  document.getElementById('fabname').textContent=FABRICS[st.fab][0]+' · '+FABRICS[st.fab][1];
+  document.getElementById('hname').textContent=st.cmp?'Manico 39 attuale (livello già colorato)':'Manico '+st.h+' · '+HANDLES[st.h].length+' bande';
+  document.getElementById('badge').textContent=st.cmp?'manici: livello attuale':'manici: nuovo motore';
+  if(ready){setBands(HANDLES[st.h]);draw();}}
+})();
+</script>
