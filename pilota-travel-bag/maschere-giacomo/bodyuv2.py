@@ -85,7 +85,20 @@ Uc=xx*1.08+3000.;Vc=-yy*1.0+3000.
 Lb=np.array(Image.open('a_base.jpg').convert('RGB')).astype(np.float32).mean(2)/255
 lt=np.clip(Lb/.8,0,1.3)**1.7
 k=np.median((lt*shw)[fr>0.5])/max(np.median(lt[fi>0.5]),1e-3)
-shc=np.full((H,W),k)
+# chiaroscuro del fianco: stesso andamento verticale del fronte (riga per riga) + scurimento verso i bordi del pannello
+m=fr>0.5;med=np.median(shw[m]);prof=np.full(H,np.nan)
+for y in range(H):
+    r=m[y]
+    if r.sum()>20: prof[y]=np.median(shw[y][r])/med
+ok=~np.isnan(prof);prof=np.interp(np.arange(H),np.arange(H)[ok],prof[ok])
+prof=ndimage.gaussian_filter1d(prof,15)
+ed=ndimage.distance_transform_edt(fi>0.5);edge=0.50+0.50*np.clip(ed/70,0,1)**0.7
+# lato posteriore (sinistra) più in ombra, come la curva del fronte che gira via dalla luce
+ys,xs=np.nonzero(fi>0.5);x0,x1=xs.min(),xs.max()
+side=0.80+0.20*np.clip((xx-x0)/max(x1-x0,1),0,1)
+y0,y1=ys.min(),ys.max();tv=np.clip((yy-y0)/max(y1-y0,1),0,1)
+vert=1.10-0.45*tv**1.4
+shc=np.clip(k*prof[:,None]*edge*side*vert,0,1.58)
 print('fianco centro',round(cx),round(cy))
 body=np.clip(np.maximum(np.maximum(fr,so),fi),0,1)
 # chiudi le fessure di 1-3 px tra un pezzo e l'altro
