@@ -202,7 +202,7 @@ let SAMPLES=[
 const SEGCOL=["#ff7a00","#00a6ff","#c03cff","#2bb673","#e6c400","#ff3d6e"];
 const seed0=()=>{const s=densify(norm(JSON.parse(JSON.stringify(SEED))));['L','R'].forEach(k=>{if(s[k])rot90(s[k]);});return s;};
 let segs=seed0(),order=Object.keys(segs);
-const FABRICS=[["Neoprene Tortora","#827268","neo"],["Neoprene Burgundy","#680f27","neo"],["Neoprene Petrolio","#1180b0","neo"],["Neoprene Army","#747465","neo"],["Neoprene Blu royal","#1056e5","neo"],["Neoprene Blu scuro","#263b74","neo"],["Dylan 710","#00becc"]];
+const FABRICS=[["Neoprene Tortora","#827268","neo"],["Neoprene Burgundy","#680f27","neo"],["Neoprene Petrolio","#1180b0","neo"],["Neoprene Army","#747465","neo"],["Neoprene Blu royal","#1056e5","neo"],["Neoprene Blu scuro","#263b74","neo"]];
 const ZIPS=[["Fucsia","#fc1680"],["Bianco","#f2f0ea"],["Nero","#1a1a1a"],["Blu","#1a3fd0"],["Verde","#2c6a3a"],["Ottone","#b08d4a"]];
 const st={mode:'man',piece:'fronte',fab:0,zip:0,sel:order[0],pt:-1,side:0,sample:2,guides:true,clip:true,uv:false,dirty:false};
 const $=id=>document.getElementById(id);
