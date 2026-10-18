@@ -99,7 +99,7 @@ kbd{font:.78rem var(--mono);border:1px solid var(--line);border-radius:3px;paddi
         <input type="range" id="trot" min="-180" max="180" step="1" value="0">
         <div class="row" style="margin-top:6px"><button class="b" id="tm90" type="button">−90°</button><button class="b" id="tp90" type="button">+90°</button><button class="b" id="t0" type="button">Dritto</button></div>
         <label class="t" for="tsc" style="margin-top:8px"><span>Grandezza della trama</span><span class="status" id="tscv"></span></label>
-        <input type="range" id="tsc" min="0.5" max="2" step="0.05" value="1">
+        <input type="range" id="tsc" min="0.3" max="4" step="0.05" value="1">
         <label class="t" for="tdx" style="margin-top:8px"><span>Sposta la trama ↔</span></label>
         <input type="range" id="tdx" min="0" max="1" step="0.01" value="0">
         <label class="t" for="tdy"><span>Sposta la trama ↕</span></label>
@@ -202,7 +202,7 @@ let SAMPLES=[
 const SEGCOL=["#ff7a00","#00a6ff","#c03cff","#2bb673","#e6c400","#ff3d6e"];
 const seed0=()=>{const s=densify(norm(JSON.parse(JSON.stringify(SEED))));['L','R'].forEach(k=>{if(s[k])rot90(s[k]);});return s;};
 let segs=seed0(),order=Object.keys(segs);
-const FABRICS=[["Neoprene Tortora","#827268","neo"],["Neoprene Burgundy","#680f27","neo"],["Neoprene Petrolio","#1180b0","neo"],["Neoprene Army","#747465","neo"],["Neoprene Blu royal","#1056e5","neo"],["Neoprene Blu scuro","#263b74","neo"]];
+const FABRICS=[["Neoprene Tortora","#827268","neo"],["Neoprene Burgundy","#680f27","neo"],["Neoprene Petrolio","#1180b0","neo"],["Neoprene Army","#747465","neo"],["Neoprene Blu royal","#1056e5","neo"],["Neoprene Blu scuro","#263b74","neo"],["Tramè Ciliegia","#85112b","trame"],["Tramè Avio","#354655","trame"],["Tramè Militare","#484c33","trame"],["Tramè Beige","#85664f","trame"]];
 const ZIPS=[["Fucsia","#fc1680"],["Bianco","#f2f0ea"],["Nero","#1a1a1a"],["Blu","#1a3fd0"],["Verde","#2c6a3a"],["Ottone","#b08d4a"]];
 const st={mode:'man',piece:'fronte',fab:0,zip:0,sel:order[0],pt:-1,side:0,sample:2,guides:true,clip:true,uv:false,dirty:false};
 const $=id=>document.getElementById(id);
@@ -296,11 +296,11 @@ function draw(){if(!ready)return;
  gl.bindBuffer(gl.ARRAY_BUFFER,quad);const lp=gl.getAttribLocation(BG,'p');gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
  [['uBase',0],['uMask',1],['uTile',2],['uBodyA',3],['uBodyB',4],['uPiece',6]].forEach(([n,u])=>gl.uniform1i(gl.getUniformLocation(BG,n),u));
  PKEYS.forEach((k,i)=>{const q=TESS[k],a=q.rot*Math.PI/180;gl.uniform4f(gl.getUniformLocation(BG,'uP'+(i+1)),Math.cos(a),Math.sin(a),1/q.scale,0);gl.uniform2f(gl.getUniformLocation(BG,'uO'+(i+1)),q.dx,q.dy);});
- const F=FABRICS[st.fab],neo=F[2]==='neo';
- if(tileKind!==(neo?'neo':'dyl')){tileKind=neo?'neo':'dyl';gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,TX.tile);
+ const F=FABRICS[st.fab],neo=F[2]==='neo',mul=F[2]==='neo'||F[2]==='trame';
+ if(tileKind!==F[2]){tileKind=F[2];gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,TX.tile);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,neo?IMS.neo:IMS.tile);gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
   const AN=gl.getExtension('EXT_texture_filter_anisotropic')||gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');if(AN)gl.texParameterf(gl.TEXTURE_2D,AN.TEXTURE_MAX_ANISOTROPY_EXT,Math.min(8,gl.getParameter(AN.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));}
- gl.uniform1f(gl.getUniformLocation(BG,'uMul'),neo?1:0);gl.uniform2fv(gl.getUniformLocation(BG,'uTS'),neo?[63.8,69.3]:[160,160]);
+ gl.uniform1f(gl.getUniformLocation(BG,'uMul'),mul?1:0);gl.uniform2fv(gl.getUniformLocation(BG,'uTS'),neo?[115,125]:[150,150]);
  gl.uniform3fv(gl.getUniformLocation(BG,'uFab'),hx(F[1]));gl.uniform3fv(gl.getUniformLocation(BG,'uZip'),hx(ZIPS[st.zip][1]));
  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);gl.disableVertexAttribArray(lp);
  gl.useProgram(RB);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
