@@ -306,6 +306,13 @@ async function paintFabric(ctx,w,h,col,fam,scale){
  const d=ctx.getImageData(0,0,w,h),p=d.data,[r,g,b]=hx(hex);
  for(let i=0;i<p.length;i+=4){const l=(p[i]*.299+p[i+1]*.587+p[i+2]*.114)/255;const k=Math.min(1.35,l/.64);p[i]=r*k;p[i+1]=g*k;p[i+2]=b*k;}
  ctx.putImageData(d,0,0);}
+// codice colore dal campione reale: media della zona centrale, corretta per la luminosità della neutra
+// (la colorazione fa colore × luminanza/0,64, quindi colore = media campione × 0,64 / luminanza media neutra)
+async function meanRGB(id){const im=await loadImg(id);if(!im)return null;const n=64,cv=document.createElement('canvas');cv.width=cv.height=n;const x=cv.getContext('2d',{willReadFrequently:true});
+ const sw=im.width*.6,sh=im.height*.6;x.drawImage(im,im.width*.2,im.height*.2,sw,sh,0,0,n,n);const p=x.getImageData(0,0,n,n).data;let r=0,g=0,b=0;for(let i=0;i<p.length;i+=4){r+=p[i];g+=p[i+1];b+=p[i+2];}const k=p.length/4;return [r/k,g/k,b/k];}
+async function hexFromSample(f,fam){if(!f)return null;const s=await meanRGB(f.id);if(!s)return null;let l=.64;
+ if(fam&&fam.neutro){const nm=await meanRGB(fam.neutro.id);if(nm)l=Math.min(1.35*.64,(nm[0]*.299+nm[1]*.587+nm[2]*.114)/255);}
+ return '#'+s.map(v=>Math.max(0,Math.min(255,Math.round(v*.64/Math.max(l,.05)))).toString(16).padStart(2,'0')).join('');}
 function bandsOf(h){const b=(h&&h.bande||[]).filter(x=>+x.w>0);return b.length?b:[{c:'#cccccc',w:100}];}
 function stripeHTML(h,vertical){const b=bandsOf(h),tot=b.reduce((a,x)=>a+ +x.w,0);return b.map(x=>`<i style="background:${esc(x.c)};${vertical?'width':'flex-basis'}:${(+x.w/tot*100).toFixed(2)}%"></i>`).join('');}
 
@@ -469,7 +476,7 @@ function edTessuto(t){
     ${come?'':`<div class="f" style="flex:0 0 auto"><span>Colore</span><div class="row nowrap"><input type="color" data-cf="hex" value="${esc(/^#[0-9a-f]{6}$/i.test(c.hex||'')?c.hex:'#888888')}" aria-label="Colore"><input class="i mono" data-cf="hexT" value="${esc(c.hex||'')}" style="width:92px" aria-label="Codice colore"></div></div>`}
     <label class="tog small" style="align-self:end;margin-bottom:6px"><input type="checkbox" data-cf="attivo" ${c.attivo!==false?'checked':''}>In vendita</label>
     <button class="b sm danger" data-key="delc-${t.id}-${i}" data-label="Togli" data-cdel="${i}" type="button" style="align-self:end;margin-bottom:4px">Togli</button>
-    ${come?`<div class="slots" style="flex:1 1 100%" data-cslot="${i}">${slotHTML('c'+i,'Scansione della variante',c.foto,{req:1})}</div>`:''}
+    ${come?`<div class="slots" style="flex:1 1 100%" data-cslot="${i}">${slotHTML('c'+i,'Scansione della variante',c.foto,{req:1})}</div>`:`<div class="slots" style="flex:1 1 100%" data-cslot="${i}">${slotHTML('c'+i,'Campione reale di questo colore',c.campione,{sub:'il codice colore si legge da qui'})}</div>${c.campione?`<div class="row" style="flex:1 1 100%"><button class="b sm" type="button" data-chex="${i}">Rileggi il colore dal campione</button><span class="small muted">A sinistra la trama neutra colorata, nello slot il campione vero: devono somigliarsi.</span></div>`:''}`}
    </div>`).join('')}</div>
   <div class="row"><button class="b" id="cadd" type="button">+ Colore</button></div>
  </section>
@@ -487,7 +494,8 @@ function edTessuto(t){
     if(f==='nome'&&!c.idFisso){}pv(i);touch('tessuti',t.id);};
    el.addEventListener(f==='attivo'?'change':'input',h);});
   const del=row.querySelector('[data-cdel]');del.onclick=e=>armDelete(e.currentTarget,()=>{t.colori.splice(i,1);touch('tessuti',t.id);vTessuti();});
-  const cs=row.querySelector('[data-cslot]');cs&&wireSlots(cs,()=>'tessuto',null,(k,f)=>{c.foto=f;touch('tessuti',t.id);re();});
+  const cs=row.querySelector('[data-cslot]');cs&&wireSlots(cs,()=>'tessuto',null,async(k,f)=>{if(come)c.foto=f;else{c.campione=f;if(f){const h=await hexFromSample(f,t);if(h)c.hex=h;}}touch('tessuti',t.id);re();});
+  const rb=row.querySelector('[data-chex]');rb&&(rb.onclick=async()=>{const h=await hexFromSample(c.campione,t);if(h){c.hex=h;touch('tessuti',t.id);re();}});
  });
  $('cadd').onclick=()=>{const n=t.colori.length+1;t.colori.push({id:(slug(t.nome)||t.id)+'_'+Date.now().toString(36),nome:'Colore '+n,hex:'#888888',attivo:true});touch('tessuti',t.id);re();};
 }
