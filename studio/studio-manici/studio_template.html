@@ -94,6 +94,7 @@ kbd{font:.78rem var(--mono);border:1px solid var(--line);border-radius:3px;paddi
         <div class="row" style="margin-top:6px">
           <button class="b" id="addp" type="button">+ Punto dopo</button>
           <button class="b" id="delp" type="button">− Elimina punto</button>
+          <button class="b" id="add3" type="button">+3 punti dopo</button>
         </div>
         <div class="name" id="ptinfo">Nessun punto selezionato.</div>
       </div>
@@ -147,7 +148,7 @@ const SAMPLES=[
  ["ENG · 9 bande",[["#0e1b2c",9.1],["#fdfeec",10.6],["#125510",6.1],["#fdfeec",13.6],["#eac415",22.7],["#feffed",13.1],["#1a580f",5.1],["#feffed",10.6],["#0c192b",9.1]]]
 ];
 const SEGCOL=["#ff7a00","#00a6ff","#c03cff","#2bb673","#e6c400","#ff3d6e"];
-const seed0=()=>{const s=norm(JSON.parse(JSON.stringify(SEED)));['L','R'].forEach(k=>{if(s[k])rot90(s[k]);});return s;};
+const seed0=()=>{const s=densify(norm(JSON.parse(JSON.stringify(SEED))));['L','R'].forEach(k=>{if(s[k])rot90(s[k]);});return s;};
 let segs=seed0(),order=Object.keys(segs);
 const st={sel:order[0],pt:-1,side:0,sample:2,guides:true,clip:true,uv:false,dirty:false};
 const $=id=>document.getElementById(id);
@@ -212,6 +213,10 @@ function rot90(seg){const S=sample(seg,1),n=S.length;const [A,B]=edges(S[0]),[D,
  seg.pts=[[...m(A,D),1,1,0,0],[...m(B,C),1,1,0,0]];const N=sample(seg,1);
  [[A,D],[B,C]].forEach(([p,q],j)=>{const c=seg.pts[j],dn=(p[0]-c[0])*N[j][4]+(p[1]-c[1])*N[j][5];const [l,r]=dn<0?[p,q]:[q,p];
   setEdge(c,N[j],-1,l[0],l[1]);setEdge(c,N[j],1,r[0],r[1]);});}
+function subdiv(seg,i){const S=sample(seg,4);const add=[1,2,3].map(k=>{const q=S[i*4+k];return [q[0],q[1],q[2],q[3],q[7],q[8]].map(v=>+v.toFixed(1));});seg.pts.splice(i+1,0,...add);}
+function lenAt(seg,i){const a=seg.pts[i],b=seg.pts[i+1];return Math.hypot(b[0]-a[0],b[1]-a[1]);}
+function densify(s){['A','B'].forEach(k=>{const g=s[k];if(!g||g.pts.length<3)return;
+ if(lenAt(g,g.pts.length-2)>60)subdiv(g,g.pts.length-2);if(lenAt(g,0)>60)subdiv(g,0);});return s;}
 function norm(s){for(const k in s)s[k].pts.forEach(p=>{while(p.length<6)p.push(0);});return s;}
 function ribbon(seg){const S=sample(seg,24);const v=[];
  for(let i=0;i<S.length-1;i++){const a=S[i],b=S[i+1];
@@ -294,6 +299,7 @@ $('rev').onclick=()=>{const s=segs[st.sel];s.reverse=!s.reverse;markDirty();sync
 $('flip').onclick=()=>{const s=segs[st.sel];s.pts.reverse();s.pts.forEach(p=>{const t=p[2];p[2]=p[3];p[3]=t;const u=p[4];p[4]=-p[5];p[5]=-u;});st.pt=-1;markDirty();sync();};
 $('addp').onclick=()=>{const s=segs[st.sel];const j=st.pt<0?0:st.pt;const n=s.pts.length;const a=s.pts[Math.min(j,n-2)],b=s.pts[Math.min(j,n-2)+1];
  s.pts.splice(Math.min(j,n-2)+1,0,a.map((v,i)=>+((v+b[i])/2).toFixed(1)));st.pt=Math.min(j,n-2)+1;st.side=0;markDirty();sync();};
+$('add3').onclick=()=>{const s=segs[st.sel];const i=Math.min(Math.max(st.pt,0),s.pts.length-2);subdiv(s,i);st.pt=i+2;st.side=0;markDirty();sync();};
 $('delp').onclick=()=>{const s=segs[st.sel];if(st.pt<0||s.pts.length<=2)return;s.pts.splice(st.pt,1);st.pt=-1;markDirty();sync();};
 $('guides').onchange=e=>{st.guides=e.target.checked;overlay();};
 $('clip').onchange=e=>{st.clip=e.target.checked;draw();};
@@ -326,7 +332,7 @@ sync();
 status('Proposta automatica caricata. Correggila e salva.');
 (async()=>{try{db=window.claude&&window.claude.use?await window.claude.use('db'):null;}catch(e){db=null;}
  if(!db){status('Salvataggio non disponibile in questa vista: usa "Copia dati".','warn');return;}
- try{const snap=await db.doc(DOC).get();if(snap.exists){const d=snap.data();if(d&&d.segments){segs=norm(JSON.parse(JSON.stringify(d.segments)));order=(d.order||Object.keys(segs)).filter(k=>segs[k]);st.sel=order[0];st.pt=-1;sync();
+ try{const snap=await db.doc(DOC).get();if(snap.exists){const d=snap.data();if(d&&d.segments){segs=densify(norm(JSON.parse(JSON.stringify(d.segments))));order=(d.order||Object.keys(segs)).filter(k=>segs[k]);st.sel=order[0];st.pt=-1;sync();
    status('Percorsi salvati caricati ('+(d.savedAt?new Date(d.savedAt).toLocaleString('it-IT'):'')+').','ok');}}
   else status('Proposta automatica: correggila e premi "Salva percorsi".');}
  catch(e){status('Non riesco a leggere i percorsi salvati ('+(e&&e.code||'errore')+').','warn');}})();
