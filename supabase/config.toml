@@ -1,4 +1,0 @@
-project_id = "kmxtrugqxlpsozsrojcz"
-
-[functions.analyze-handle-geometry]
-verify_jwt = false
