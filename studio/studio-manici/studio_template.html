@@ -1,4 +1,4 @@
-<title>Studio Manici QG Bags</title>
+<title>Studio QG Bags</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -67,8 +67,8 @@ kbd{font:.78rem var(--mono);border:1px solid var(--line);border-radius:3px;paddi
 <div class="wrap">
   <header>
     <div class="eyebrow">QG Bags · Studio di settaggio · Travel Bag 3/4</div>
-    <h1>Percorsi dei manici</h1>
-    <p class="muted" style="margin-top:8px">Per ogni tratto sistema la linea centrale (punti tondi) e le due linee laterali (quadratini). Le righe vengono distribuite esattamente tra le due laterali. Controlla il risultato cambiando manico campione.</p>
+    <h1>Studio della Travel Bag</h1>
+    <p class="muted" style="margin-top:8px">Qui si regola e si prova tutto: percorsi dei manici, ricette dei manici, tessuti e zip. Per vedere la borsa pulita togli la spunta a “Mostra le guide”.</p>
   </header>
 
   <div class="lab">
@@ -106,7 +106,12 @@ kbd{font:.78rem var(--mono);border:1px solid var(--line);border-radius:3px;paddi
         <div class="name" id="ptinfo">Nessun punto selezionato.</div>
       </div>
       <div>
-        <h3>Manico campione</h3>
+        <h3>Tessuto</h3>
+        <div class="chips" id="fabs"></div>
+        <div class="name" id="fname"></div>
+        <h3 style="margin-top:14px">Zip</h3>
+        <div class="chips" id="zips"></div>
+        <h3 style="margin-top:14px">Manico</h3>
         <div class="chips" id="samples"></div>
         <div class="name" id="sname"></div>
         <div class="rec">
@@ -158,7 +163,7 @@ kbd{font:.78rem var(--mono);border:1px solid var(--line);border-radius:3px;paddi
 
 <script>
 (function(){
-const IMG={base:"__BASE__",masks:"__MASKS__",tile:"__TILE__",ba:"__BODYA__",bb:"__BODYB__"};
+const IMG={neo:"__NEO__",base:"__BASE__",masks:"__MASKS__",tile:"__TILE__",ba:"__BODYA__",bb:"__BODYB__"};
 const SEED=__SEED__;
 const DOC="percorsi/travel-bag-3q";
 const W=1174,H=1179;
@@ -177,7 +182,9 @@ let SAMPLES=[
 const SEGCOL=["#ff7a00","#00a6ff","#c03cff","#2bb673","#e6c400","#ff3d6e"];
 const seed0=()=>{const s=densify(norm(JSON.parse(JSON.stringify(SEED))));['L','R'].forEach(k=>{if(s[k])rot90(s[k]);});return s;};
 let segs=seed0(),order=Object.keys(segs);
-const st={sel:order[0],pt:-1,side:0,sample:2,guides:true,clip:true,uv:false,dirty:false};
+const FABRICS=[["Neoprene Tortora","#827268","neo"],["Neoprene Burgundy","#680f27","neo"],["Neoprene Petrolio","#1180b0","neo"],["Neoprene Army","#747465","neo"],["Neoprene Blu royal","#1056e5","neo"],["Neoprene Blu scuro","#263b74","neo"],["Dylan 710","#00becc"]];
+const ZIPS=[["Fucsia","#fc1680"],["Bianco","#f2f0ea"],["Nero","#1a1a1a"],["Blu","#1a3fd0"],["Verde","#2c6a3a"],["Ottone","#b08d4a"]];
+const st={fab:0,zip:0,sel:order[0],pt:-1,side:0,sample:2,guides:true,clip:true,uv:false,dirty:false};
 const $=id=>document.getElementById(id);
 
 // ---------- WebGL ----------
@@ -186,12 +193,12 @@ if(!gl){$('st').textContent='WebGL non disponibile su questo dispositivo.';retur
 function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(o);return o;}
 function prog(vs,fs){const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);return p;}
 const BG=prog(`attribute vec2 p;varying vec2 t;void main(){t=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0,1);}`,
-`precision highp float;varying vec2 t;uniform sampler2D uBase,uMask,uTile,uBodyA,uBodyB;uniform vec3 uFab;
+`precision highp float;varying vec2 t;uniform sampler2D uBase,uMask,uTile,uBodyA,uBodyB;uniform vec3 uFab,uZip;uniform float uMul;uniform vec2 uTS;
 float d16(vec4 q){return (q.r*255.*256.+q.g*255.)/16.;}
 void main(){vec3 base=texture2D(uBase,t).rgb;float Lb=dot(base,vec3(.3333));vec4 m=texture2D(uMask,t);
  vec4 qa=texture2D(uBodyA,t),qb=texture2D(uBodyB,t);vec2 s=vec2(d16(qa),d16(qb));float ao=qa.b,syn=qb.b*255./160.;
- float det=texture2D(uTile,s/160.).r;vec3 body=uFab*(.62+.76*det)*pow(clamp(Lb/.8,0.,1.3),1.7)*syn*.92*(1.-.5*ao);
- vec3 c=mix(base,body,m.g);c=mix(c,vec3(.99,.09,.5)*pow(clamp(Lb/.82,0.,1.3),1.4),m.b);gl_FragColor=vec4(c,1.);}`);
+ float det=texture2D(uTile,s/uTS).r;vec3 alb=uMul>.5?uFab*clamp(det/.64,0.,1.35):uFab*(.62+.76*det);vec3 body=alb*pow(clamp(Lb/.8,0.,1.3),1.7)*syn*.92*(1.-.5*ao);
+ vec3 c=mix(base,body,m.g);c=mix(c,uZip*pow(clamp(Lb/.82,0.,1.3),1.4),m.b);gl_FragColor=vec4(c,1.);}`);
 const RB=prog(`attribute vec2 p;attribute vec3 a;varying vec3 v;void main(){v=a;gl_Position=vec4(p.x/${W}.*2.-1.,1.-p.y/${H}.*2.,0,1);}`,
 `precision highp float;varying vec3 v;uniform sampler2D uBase,uMask,uBands;uniform float uClip,uUV,uRev;
 float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -261,12 +268,16 @@ function ribbon(seg){const S=sample(seg,24);const [EL,ER]=edgeCurves(seg,24);con
   v.push(...A0,...A1,...B0,...A1,...B1,...B0);}
  return new Float32Array(v);}
 
-let ready=false;
+let ready=false,tileKind='';const IMS={};const hx=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);
 function draw(){if(!ready)return;
  gl.viewport(0,0,W,H);gl.disable(gl.BLEND);gl.useProgram(BG);
  gl.bindBuffer(gl.ARRAY_BUFFER,quad);const lp=gl.getAttribLocation(BG,'p');gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
  [['uBase',0],['uMask',1],['uTile',2],['uBodyA',3],['uBodyB',4]].forEach(([n,u])=>gl.uniform1i(gl.getUniformLocation(BG,n),u));
- gl.uniform3fv(gl.getUniformLocation(BG,'uFab'),[0,.745,.8]);
+ const F=FABRICS[st.fab],neo=F[2]==='neo';
+ if(tileKind!==(neo?'neo':'dyl')){tileKind=neo?'neo':'dyl';gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,TX.tile);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,neo?IMS.neo:IMS.tile);gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);}
+ gl.uniform1f(gl.getUniformLocation(BG,'uMul'),neo?1:0);gl.uniform2fv(gl.getUniformLocation(BG,'uTS'),neo?[63.8,69.3]:[160,160]);
+ gl.uniform3fv(gl.getUniformLocation(BG,'uFab'),hx(F[1]));gl.uniform3fv(gl.getUniformLocation(BG,'uZip'),hx(ZIPS[st.zip][1]));
  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);gl.disableVertexAttribArray(lp);
  gl.useProgram(RB);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
  [['uBase',0],['uMask',1],['uBands',5]].forEach(([n,u])=>gl.uniform1i(gl.getUniformLocation(RB,n),u));
@@ -328,6 +339,7 @@ function segList(){const box=$('segs');box.innerHTML='';order.forEach((k,i)=>{co
  b.children[1].textContent=s.name;b.onclick=()=>{st.sel=k;st.pt=-1;sync();};box.appendChild(b);});}
 function renderSamples(){$('samples').innerHTML='';SAMPLES.forEach(([n,spec],i)=>{const tot=spec.reduce((a,b)=>a+b[1],0);let acc=0;const g='linear-gradient(90deg,'+spec.map(([c,w])=>{const a=acc/tot*100;acc+=w;return `${c} ${a.toFixed(1)}% ${(acc/tot*100).toFixed(1)}%`;}).join(',')+')';
  const b=document.createElement('button');b.type='button';b.className='sw';b.id='sm-'+i;b.style.background=g;b.setAttribute('aria-label',n);b.onclick=()=>{st.sample=i;bsel=0;sync();};$('samples').appendChild(b);});}
+[['fabs',FABRICS,'fab'],['zips',ZIPS,'zip']].forEach(([id,L,key])=>L.forEach((it,i)=>{const b=document.createElement('button');b.type='button';b.className='sw';b.style.background=it[1];b.setAttribute('aria-label',it[0]);b.title=it[0];b.onclick=()=>{st[key]=i;sync();};$(id).appendChild(b);}));
 renderSamples();
 
 // ---------- ricetta del manico ----------
@@ -372,6 +384,7 @@ $('uvv').onchange=e=>{st.uv=e.target.checked;draw();};
 $('zoom').oninput=e=>{$('stage').style.setProperty('--z',e.target.value);$('zv').textContent=Math.round(e.target.value*100)+'%';};
 function sync(){segList();const s=segs[st.sel];$('layer').textContent=s.layer==='back'?'Dietro':'Davanti';$('rev').setAttribute('aria-pressed',!!s.reverse);
  document.querySelectorAll('#samples .sw').forEach((b,i)=>b.setAttribute('aria-pressed',i===st.sample));
+ document.querySelectorAll('#fabs .sw').forEach((b,i)=>b.setAttribute('aria-pressed',i===st.fab));document.querySelectorAll('#zips .sw').forEach((b,i)=>b.setAttribute('aria-pressed',i===st.zip));$('fname').textContent=FABRICS[st.fab][0]+' · '+FABRICS[st.fab][1];
  $('sname').textContent=SAMPLES[st.sample][0]+' · '+SAMPLES[st.sample][1].length+(SAMPLES[st.sample][1].length===1?' banda':' bande');if(ready)setBands(SAMPLES[st.sample][1]);overlay();draw();info();renderStrip();}
 
 // ---------- salvataggio ----------
@@ -390,8 +403,8 @@ $('reset').onclick=()=>{segs=seed0();order=Object.keys(segs);st.sel=order[0];st.
 
 // ---------- avvio ----------
 function load(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
-Promise.all(['base','masks','tile','ba','bb'].map(k=>load(IMG[k]))).then(([b,m,t,ba,bb])=>{
- TX.base=mk(0,b,{});TX.mask=mk(1,m,{});TX.tile=mk(2,t,{r:true});TX.ba=mk(3,ba,{n:true});TX.bb=mk(4,bb,{n:true});TX.bands=mk(5,bc,{});
+Promise.all(['base','masks','tile','ba','bb','neo'].map(k=>load(IMG[k]))).then(([b,m,t,ba,bb,nn])=>{
+ IMS.tile=t;IMS.neo=nn;TX.base=mk(0,b,{});TX.mask=mk(1,m,{});TX.tile=mk(2,t,{r:true});TX.ba=mk(3,ba,{n:true});TX.bb=mk(4,bb,{n:true});TX.bands=mk(5,bc,{});
  ready=true;sync();});
 sync();
 status('Proposta automatica caricata. Correggila e salva.');
