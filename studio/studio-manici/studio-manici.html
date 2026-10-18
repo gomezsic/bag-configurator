@@ -53,6 +53,14 @@ input[type=range]{width:100%}
 .help{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;font-size:.9rem}
 .help div{border-top:3px solid var(--accent);padding-top:8px;min-width:0}
 .help b{display:block;font:500 1rem var(--display);margin-bottom:2px}
+.strip{position:relative;display:flex;height:64px;border:1px solid var(--line);border-radius:4px;overflow:visible;touch-action:none;user-select:none}
+.strip .bd{height:100%;cursor:pointer;min-width:0}
+.strip .bd.on{outline:3px solid var(--accent);outline-offset:-3px;position:relative;z-index:1}
+.strip .dv{position:absolute;top:-6px;bottom:-6px;width:14px;margin-left:-7px;cursor:ew-resize;z-index:2;display:flex;justify-content:center}
+.strip .dv::after{content:"";width:3px;height:100%;background:var(--fg);border:1px solid var(--surface);border-radius:2px}
+input[type=color]{width:44px;height:32px;border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:2px}
+.txt{border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--fg);padding:6px 8px;font:.88rem var(--body);flex:1;min-width:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 kbd{font:.78rem var(--mono);border:1px solid var(--line);border-radius:3px;padding:0 4px;background:var(--bg)}
 </style>
 
@@ -101,6 +109,26 @@ kbd{font:.78rem var(--mono);border:1px solid var(--line);border-radius:3px;paddi
         <h3>Manico campione</h3>
         <div class="chips" id="samples"></div>
         <div class="name" id="sname"></div>
+        <div class="rec">
+          <h3 style="margin:14px 0 6px">Ricetta del manico</h3>
+          <div class="strip" id="strip" aria-label="Bande del manico: clicca una banda per sceglierla, trascina le linee per cambiarne la larghezza"></div>
+          <div class="name" id="binfo"></div>
+          <div class="row" style="margin-top:6px">
+            <label class="sr" for="bcol">Colore banda</label><input type="color" id="bcol">
+            <button class="b" id="eye" type="button" hidden>Contagocce</button>
+            <button class="b" id="bsplit" type="button">Dividi banda</button>
+            <button class="b" id="bdel" type="button">Togli banda</button>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <label class="sr" for="bname">Codice manico</label><input id="bname" class="txt" placeholder="Codice manico">
+            <button class="b" id="bnew" type="button">+ Nuovo</button>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button class="b primary" id="bsave" type="button">Salva manici</button>
+            <button class="b" id="bcopy" type="button">Copia dati</button>
+          </div>
+          <div class="status" id="bst" style="margin-top:6px"></div>
+        </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px">
         <h3 style="margin:0">Vista</h3>
@@ -134,17 +162,17 @@ const IMG={base:"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMC
 const SEED={"A":{"name":"Manico davanti","layer":"front","reverse":false,"pts":[[523.6,952.4,11.7,11.7],[560.2,851.8,27.9,27.9],[534.4,744.1,12.7,12.7],[532.9,634.9,27.0,27.0],[530.2,525.5,27.5,27.5],[528.1,414.6,26.2,26.2],[527.4,305.2,17.4,17.4],[553.7,199.7,11.2,11.2],[635.7,171.5,12.6,12.6],[709.1,251.5,13.2,13.2],[747.3,354.0,20.4,20.4],[778.4,460.5,25.7,25.7],[808.4,565.8,26.6,26.6],[845.4,670.2,22.2,22.2],[860.1,776.6,24.8,24.8],[827.4,877.7,12.1,12.1]]},"B":{"name":"Manico dietro","layer":"back","reverse":false,"pts":[[379.7,524.4,19.6,19.6],[425.9,421.1,25.8,25.8],[465.1,309.3,24.2,24.2],[514.7,205.6,9.2,9.2],[617.0,158.5,8.8,8.8],[657.3,258.3,11.5,11.5],[660.0,375.8,26.8,26.8],[647.5,492.1,26.9,26.9]]},"T":{"name":"Tracolla sinistra","layer":"front","reverse":false,"pts":[[199.2,675.8,10.2,10.2],[184.4,771.4,21.8,21.8],[176.0,865.8,17.5,17.5]]},"L":{"name":"Linguetta sinistra","layer":"front","reverse":false,"pts":[[243.4,544.6,13.3,13.3],[262.4,563.8,15.5,15.5]]},"R":{"name":"Linguetta destra","layer":"front","reverse":false,"pts":[[884.1,465.0,11.7,11.7],[910.2,471.9,11.9,11.9]]}};
 const DOC="percorsi/travel-bag-3q";
 const W=1174,H=1179;
-const SAMPLES=[
+let SAMPLES=[
  ["Tinta unita",[["#1d2a55",1]]],
- ["22 · 3 colori",[["#04042a",31.3],["#ffffff",35.9],["#04042a",32.8]]],
- ["26 · 3 colori",[["#17086d",31.3],["#fe0094",35.9],["#fffadd",32.8]]],
- ["26X · 3 colori",[["#ff3ac8",31.3],["#08172a",35.9],["#fffadd",32.8]]],
- ["18 · 5 bande",[["#000000",26.3],["#b0af9b",16.2],["#66652f",17.2],["#b0af9b",14.1],["#000000",26.3]]],
- ["20 · 5 bande",[["#8c8a73",26.3],["#05042c",16.2],["#f4f4e8",17.2],["#05042c",14.1],["#8c8a73",26.3]]],
- ["64X · 5 bande",[["#ff3ac8",19.7],["#083fcb",19.7],["#ff3ac8",19.7],["#083fcb",19.7],["#ff3ac8",21.2]]],
- ["25 · 3 colori",[["#fd5001",31.3],["#18009c",35.9],["#957a4b",32.8]]],
- ["77 · 6 bande",[["#06032a",6.6],["#e9a4bf",22.2],["#91704f",21.2],["#fef4c9",23.2],["#d814a1",20.7],["#090629",6.1]]],
- ["ENG · 9 bande",[["#0e1b2c",9.1],["#fdfeec",10.6],["#125510",6.1],["#fdfeec",13.6],["#eac415",22.7],["#feffed",13.1],["#1a580f",5.1],["#feffed",10.6],["#0c192b",9.1]]]
+ ["22",[["#04042a",31.3],["#ffffff",35.9],["#04042a",32.8]]],
+ ["26",[["#17086d",31.3],["#fe0094",35.9],["#fffadd",32.8]]],
+ ["26X",[["#ff3ac8",31.3],["#08172a",35.9],["#fffadd",32.8]]],
+ ["18",[["#000000",26.3],["#b0af9b",16.2],["#66652f",17.2],["#b0af9b",14.1],["#000000",26.3]]],
+ ["20",[["#8c8a73",26.3],["#05042c",16.2],["#f4f4e8",17.2],["#05042c",14.1],["#8c8a73",26.3]]],
+ ["64X",[["#ff3ac8",19.7],["#083fcb",19.7],["#ff3ac8",19.7],["#083fcb",19.7],["#ff3ac8",21.2]]],
+ ["25",[["#fd5001",31.3],["#18009c",35.9],["#957a4b",32.8]]],
+ ["77",[["#06032a",6.6],["#e9a4bf",22.2],["#91704f",21.2],["#fef4c9",23.2],["#d814a1",20.7],["#090629",6.1]]],
+ ["ENG",[["#0e1b2c",9.1],["#fdfeec",10.6],["#125510",6.1],["#fdfeec",13.6],["#eac415",22.7],["#feffed",13.1],["#1a580f",5.1],["#feffed",10.6],["#0c192b",9.1]]]
 ];
 const SEGCOL=["#ff7a00","#00a6ff","#c03cff","#2bb673","#e6c400","#ff3d6e"];
 const seed0=()=>{const s=densify(norm(JSON.parse(JSON.stringify(SEED))));['L','R'].forEach(k=>{if(s[k])rot90(s[k]);});return s;};
@@ -298,8 +326,40 @@ function info(){const seg=segs[st.sel];if(st.pt<0){$('ptinfo').textContent='Ness
 function segList(){const box=$('segs');box.innerHTML='';order.forEach((k,i)=>{const s=segs[k];const b=document.createElement('button');b.type='button';b.className='seg';b.id='seg-'+k;
  b.setAttribute('aria-pressed',k===st.sel);b.innerHTML=`<span class="dot" style="background:${SEGCOL[i%SEGCOL.length]}"></span><span></span><span class="tag">${s.layer==='back'?'dietro':'davanti'}${s.reverse?' · rovescio':''}</span>`;
  b.children[1].textContent=s.name;b.onclick=()=>{st.sel=k;st.pt=-1;sync();};box.appendChild(b);});}
-SAMPLES.forEach(([n,spec],i)=>{const tot=spec.reduce((a,b)=>a+b[1],0);let acc=0;const g='linear-gradient(90deg,'+spec.map(([c,w])=>{const a=acc/tot*100;acc+=w;return `${c} ${a.toFixed(1)}% ${(acc/tot*100).toFixed(1)}%`;}).join(',')+')';
- const b=document.createElement('button');b.type='button';b.className='sw';b.id='sm-'+i;b.style.background=g;b.setAttribute('aria-label',n);b.onclick=()=>{st.sample=i;sync();};$('samples').appendChild(b);});
+function renderSamples(){$('samples').innerHTML='';SAMPLES.forEach(([n,spec],i)=>{const tot=spec.reduce((a,b)=>a+b[1],0);let acc=0;const g='linear-gradient(90deg,'+spec.map(([c,w])=>{const a=acc/tot*100;acc+=w;return `${c} ${a.toFixed(1)}% ${(acc/tot*100).toFixed(1)}%`;}).join(',')+')';
+ const b=document.createElement('button');b.type='button';b.className='sw';b.id='sm-'+i;b.style.background=g;b.setAttribute('aria-label',n);b.onclick=()=>{st.sample=i;bsel=0;sync();};$('samples').appendChild(b);});}
+renderSamples();
+
+// ---------- ricetta del manico ----------
+const RDOC='ricette/manici';var bsel=0;
+function cur(){return SAMPLES[st.sample][1];}
+function pct(){const b=cur(),tot=b.reduce((a,x)=>a+x[1],0);return b.map(x=>x[1]/tot*100);}
+function renderStrip(){const s=$('strip');if(!s)return;s.innerHTML='';const b=cur(),P=pct();if(bsel>=b.length)bsel=b.length-1;let acc=0;
+ b.forEach(([c],i)=>{const d=document.createElement('div');d.className='bd'+(i===bsel?' on':'');d.style.background=c;d.style.width=P[i]+'%';d.title='Banda '+(i+1);d.onclick=()=>{bsel=i;renderStrip();};s.appendChild(d);});
+ for(let i=0;i<b.length-1;i++){acc+=P[i];const v=document.createElement('div');v.className='dv';v.style.left=acc+'%';v.addEventListener('pointerdown',e=>dvDrag(e,i));s.appendChild(v);}
+ $('bcol').value=b[bsel][0];$('binfo').textContent=`${b.length} ${b.length===1?'banda':'bande'} · banda ${bsel+1}: ${b[bsel][0]} · ${P[bsel].toFixed(1)}% della larghezza`;
+ if(document.activeElement!==$('bname'))$('bname').value=SAMPLES[st.sample][0];}
+function dvDrag(e,i){e.preventDefault();const s=$('strip');s.setPointerCapture(e.pointerId);
+ const mv=ev=>{const r=s.getBoundingClientRect();const x=Math.min(100,Math.max(0,(ev.clientX-r.left)/r.width*100));const P=pct();
+  const left=P.slice(0,i).reduce((a,v)=>a+v,0),pair=P[i]+P[i+1];const a=Math.min(pair-1,Math.max(1,x-left));
+  const b=cur();b.forEach((q,k)=>q[1]=+P[k].toFixed(2));b[i][1]=+a.toFixed(2);b[i+1][1]=+(pair-a).toFixed(2);bsel=i;recApply();};
+ const up=()=>{s.removeEventListener('pointermove',mv);s.removeEventListener('pointerup',up);recDirty();};
+ s.addEventListener('pointermove',mv);s.addEventListener('pointerup',up);}
+function recApply(){if(ready)setBands(cur());draw();$('sname').textContent=SAMPLES[st.sample][0]+' · '+cur().length+(cur().length===1?' banda':' bande');renderSamples();document.querySelectorAll('#samples .sw').forEach((b,i)=>b.setAttribute('aria-pressed',i===st.sample));renderStrip();}
+function bstat(t,c){const e=$('bst');e.textContent=t;e.className='status'+(c?' '+c:'');}
+let rTimer=null;function recDirty(){bstat(db?'Manici modificati, salvataggio…':'Manici modificati (usa "Copia dati").','warn');clearTimeout(rTimer);if(db)rTimer=setTimeout(recSave,1500);}
+async function recSave(){if(!db){bstat('Salvataggio non disponibile in questa vista: usa "Copia dati".','warn');return;}
+ try{await db.doc(RDOC).set({list:SAMPLES.map(([n,b])=>({name:n,bands:b.map(([c,w])=>({c,w}))})),savedAt:new Date().toISOString()});
+  bstat('Manici salvati alle '+new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),'ok');}
+ catch(e){bstat('Non salvato ('+(e&&e.code||'errore')+'). Riprova o usa "Copia dati".','warn');}}
+$('bcol').oninput=e=>{cur()[bsel][0]=e.target.value;recApply();};$('bcol').onchange=recDirty;
+if(window.EyeDropper){$('eye').hidden=false;$('eye').onclick=async()=>{try{const r=await new EyeDropper().open();cur()[bsel][0]=r.sRGBHex;recApply();recDirty();}catch(e){}};}
+$('bsplit').onclick=()=>{const b=cur(),w=b[bsel][1]/2;b[bsel][1]=w;b.splice(bsel+1,0,[b[bsel][0],w]);bsel++;recApply();recDirty();};
+$('bdel').onclick=()=>{const b=cur();if(b.length<2)return;const w=b[bsel][1];b.splice(bsel,1);const k=Math.max(0,bsel-1);b[k][1]+=w;bsel=k;recApply();recDirty();};
+$('bname').onchange=e=>{const v=e.target.value.trim();if(!v)return;SAMPLES[st.sample][0]=v;renderSamples();sync();recDirty();};
+$('bnew').onclick=()=>{SAMPLES.push(['Nuovo manico',[['#c9c9c9',100]]]);st.sample=SAMPLES.length-1;bsel=0;renderSamples();sync();$('bname').focus();$('bname').select();recDirty();};
+$('bsave').onclick=()=>{clearTimeout(rTimer);recSave();};
+$('bcopy').onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify(SAMPLES));bstat('Dati dei manici copiati.','ok');}catch(e){bstat('Copia non riuscita in questa vista.','warn');}};
 $('layer').onclick=()=>{const s=segs[st.sel];s.layer=s.layer==='back'?'front':'back';markDirty();sync();};
 $('rot').onclick=()=>{rot90(segs[st.sel]);st.pt=-1;markDirty();sync();};
 $('rev').onclick=()=>{const s=segs[st.sel];s.reverse=!s.reverse;markDirty();sync();};
@@ -312,7 +372,7 @@ $('uvv').onchange=e=>{st.uv=e.target.checked;draw();};
 $('zoom').oninput=e=>{$('stage').style.setProperty('--z',e.target.value);$('zv').textContent=Math.round(e.target.value*100)+'%';};
 function sync(){segList();const s=segs[st.sel];$('layer').textContent=s.layer==='back'?'Dietro':'Davanti';$('rev').setAttribute('aria-pressed',!!s.reverse);
  document.querySelectorAll('#samples .sw').forEach((b,i)=>b.setAttribute('aria-pressed',i===st.sample));
- $('sname').textContent=SAMPLES[st.sample][0];if(ready)setBands(SAMPLES[st.sample][1]);overlay();draw();info();}
+ $('sname').textContent=SAMPLES[st.sample][0]+' · '+SAMPLES[st.sample][1].length+(SAMPLES[st.sample][1].length===1?' banda':' bande');if(ready)setBands(SAMPLES[st.sample][1]);overlay();draw();info();renderStrip();}
 
 // ---------- salvataggio ----------
 let db=null,saveTimer=null,saving=false;
@@ -336,7 +396,9 @@ Promise.all(['base','masks','tile','ba','bb'].map(k=>load(IMG[k]))).then(([b,m,t
 sync();
 status('Proposta automatica caricata. Correggila e salva.');
 (async()=>{try{db=window.claude&&window.claude.use?await window.claude.use('db'):null;}catch(e){db=null;}
- if(!db){status('Salvataggio non disponibile in questa vista: usa "Copia dati".','warn');return;}
+ if(!db){status('Salvataggio non disponibile in questa vista: usa "Copia dati".','warn');bstat('Salvataggio non disponibile in questa vista: usa "Copia dati".','warn');return;}
+ try{const rs=await db.doc(RDOC).get();if(rs.exists){const d=rs.data();if(d&&Array.isArray(d.list)&&d.list.length){SAMPLES=d.list.map(x=>[x.name,x.bands.map(b=>[b.c,b.w])]);st.sample=Math.min(st.sample,SAMPLES.length-1);renderSamples();sync();bstat('Manici salvati caricati.','ok');}}
+  else bstat('Manici campione dalle tue scansioni: correggili e premi "Salva manici".');}catch(e){bstat('Non riesco a leggere i manici salvati ('+(e&&e.code||'errore')+').','warn');}
  try{const snap=await db.doc(DOC).get();if(snap.exists){const d=snap.data();if(d&&d.segments){segs=densify(norm(JSON.parse(JSON.stringify(d.segments))));order=(d.order||Object.keys(segs)).filter(k=>segs[k]);st.sel=order[0];st.pt=-1;sync();
    status('Percorsi salvati caricati ('+(d.savedAt?new Date(d.savedAt).toLocaleString('it-IT'):'')+').','ok');}}
   else status('Proposta automatica: correggila e premi "Salva percorsi".');}
