@@ -298,7 +298,8 @@ function draw(){if(!ready)return;
  PKEYS.forEach((k,i)=>{const q=TESS[k],a=q.rot*Math.PI/180;gl.uniform4f(gl.getUniformLocation(BG,'uP'+(i+1)),Math.cos(a),Math.sin(a),1/q.scale,0);gl.uniform2f(gl.getUniformLocation(BG,'uO'+(i+1)),q.dx,q.dy);});
  const F=FABRICS[st.fab],neo=F[2]==='neo';
  if(tileKind!==(neo?'neo':'dyl')){tileKind=neo?'neo':'dyl';gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,TX.tile);
-  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,neo?IMS.neo:IMS.tile);gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);}
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,neo?IMS.neo:IMS.tile);gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
+  const AN=gl.getExtension('EXT_texture_filter_anisotropic')||gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');if(AN)gl.texParameterf(gl.TEXTURE_2D,AN.TEXTURE_MAX_ANISOTROPY_EXT,Math.min(8,gl.getParameter(AN.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));}
  gl.uniform1f(gl.getUniformLocation(BG,'uMul'),neo?1:0);gl.uniform2fv(gl.getUniformLocation(BG,'uTS'),neo?[63.8,69.3]:[160,160]);
  gl.uniform3fv(gl.getUniformLocation(BG,'uFab'),hx(F[1]));gl.uniform3fv(gl.getUniformLocation(BG,'uZip'),hx(ZIPS[st.zip][1]));
  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);gl.disableVertexAttribArray(lp);
@@ -426,7 +427,7 @@ $('reset').onclick=()=>{segs=seed0();order=Object.keys(segs);st.sel=order[0];st.
 
 
 // ---------- verso del tessuto ----------
-const PIECES={"fronte": {"id": 1, "nome": "Corpo davanti", "x": 643, "y": 729, "J": [[1.0808, -0.1441], [-0.1108, -0.9975]]}, "sopra": {"id": 2, "nome": "Fascia sopra", "x": 564, "y": 523, "J": [[0.7565, -1.0808], [-0.7695, -4.0812]]}, "fianco": {"id": 3, "nome": "Fianco", "x": 276, "y": 791, "J": [[0.0792, 1.1932], [-3.4397, 0.2284]]}};const PKEYS=Object.keys(PIECES);const TDOC='tessuto/travel-bag-3q';
+const PIECES={"fronte": {"id": 1, "nome": "Corpo davanti", "x": 643, "y": 729, "J": [[1.0808, -0.1441], [-0.1108, -0.9975]]}, "sopra": {"id": 2, "nome": "Fascia sopra", "x": 564, "y": 523, "J": [[0.7565, -1.0808], [-0.7695, -4.0812]]}, "fianco": {"id": 3, "nome": "Fianco", "x": 276, "y": 791, "J": [[0.0792, 1.1932], [-1.2383, 0.0822]]}};const PKEYS=Object.keys(PIECES);const TDOC='tessuto/travel-bag-3q';
 const TESS={};PKEYS.forEach(k=>TESS[k]={rot:0,scale:1,dx:0,dy:0});
 const PCOL={fronte:'#ff7a00',sopra:'#2bb673',fianco:'#00a6ff'};
 function pdir(k,deg){const J=PIECES[k].J,a=deg*Math.PI/180,u=[Math.sin(a),Math.cos(a)];const d=J[0][0]*J[1][1]-J[0][1]*J[1][0];
