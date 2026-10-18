@@ -165,7 +165,9 @@ Dal campionario che mi hai mandato ho ricavato il colore del filo di ogni varian
 | Blu royal | `#1056e5` |
 | Blu scuro | `#263b74` |
 
-Ho fatto una prova di colorazione partendo da una sola trama neutra, ricavata dal campione Army: [prova-colorazione-neoprene.png](/mnt/project-files/configuratore/tessuti/neoprene/prova-colorazione-neoprene.png). Il metodo della moltiplicazione funziona bene sul neoprene, perché i fori restano scuri in tutti i colori. La trama provvisoria è [neoprene-neutro-provvisorio.png](/mnt/project-files/configuratore/tessuti/neoprene/neoprene-neutro-provvisorio.png). Va sostituita con la tua scansione neutra a 300 dpi, perché quella del campionario è piccola e compressa.
+La tua trama neutra (`neoprene-neutro-originale.jpg`, 1024 px a 600 dpi, cioè 4,3 cm di lato) l'ho trasformata in una trama ripetibile senza giunture, 3,99 × 4,33 cm: [neoprene-trama-ripetibile.png](/mnt/project-files/configuratore/tessuti/neoprene/neoprene-trama-ripetibile.png). I 6 colori sono già sulla Travel nella [pilota](https://claude.ai/artifact/KMuu3Z8KrdEKPykFVzRP7j), in scala reale. La prova di colorazione sul campionario è in [prova-colorazione-neoprene.png](/mnt/project-files/configuratore/tessuti/neoprene/prova-colorazione-neoprene.png).
+
+Va bene anche una scansione come questa, a 600 dpi e più piccola di 20 cm, purché contenga almeno 8–10 ripetizioni del motivo.
 
 I codici sono un punto di partenza letto da una foto: li confrontiamo a vista con i tessuti veri.
 

@@ -52,7 +52,7 @@ label.row{display:flex;justify-content:space-between;gap:10px;font-size:.9rem;al
   <div class="lab">
     <div class="stage"><canvas id="cv" width="1174" height="1179" aria-label="Travel Bag con tessuto, zip e manici scelti"></canvas><div class="badge" id="badge">nuovo motore</div></div>
     <div class="panel">
-      <div><h3>Tessuto (tile 710 ricolorato)</h3><div class="chips" id="fabrics"></div><div class="name" id="fabname"></div></div>
+      <div><h3>Tessuto</h3><div class="chips" id="fabrics"></div><div class="name" id="fabname"></div></div>
       <div><h3>Manici</h3><div class="chips" id="handles"></div><div class="name" id="hname"></div></div>
       <div><h3>Zip</h3><div class="chips" id="zips"></div></div>
       <label class="row" for="cmp"><span>Mostra il manico 39 attuale</span><input type="checkbox" id="cmp"></label>
@@ -70,8 +70,8 @@ label.row{display:flex;justify-content:space-between;gap:10px;font-size:.9rem;al
 
 <script>
 (function(){
-const IMG={base:"__BASE__",uv:"__UV__",masks:"__MASKS__",tile:"__TILE__",orig:"__ORIG__",ba:"__BODYA__",bb:"__BODYB__"};
-const FABRICS=[["Dylan 710","#00becc"],["Blu notte","#1d2a55"],["Prugna","#5a2346"],["Militare","#5f6440"],["Beige","#c9a77a"],["Bordeaux","#7a1a2a"],["Ottanio","#0f5a66"]];
+const IMG={neo:"__NEO__",base:"__BASE__",uv:"__UV__",masks:"__MASKS__",tile:"__TILE__",orig:"__ORIG__",ba:"__BODYA__",bb:"__BODYB__"};
+const FABRICS=[["Neoprene Tortora","#827268","neo"],["Neoprene Burgundy","#680f27","neo"],["Neoprene Petrolio","#1180b0","neo"],["Neoprene Army","#747465","neo"],["Neoprene Blu royal","#1056e5","neo"],["Neoprene Blu scuro","#263b74","neo"],["Dylan 710","#00becc"],["Blu notte","#1d2a55"],["Prugna","#5a2346"],["Militare","#5f6440"],["Beige","#c9a77a"],["Bordeaux","#7a1a2a"],["Ottanio","#0f5a66"]];
 const HANDLES={
  "39":[["#151515",1],["#d0246f",1.2],["#151515",1]],
  "101":[["#7b4fd6",1],["#6b3a1c",1],["#0f5560",1]],
@@ -92,7 +92,7 @@ const gl=cv.getContext('webgl',{preserveDrawingBuffer:true,premultipliedAlpha:fa
 if(!gl){cv.replaceWith(Object.assign(document.createElement('p'),{textContent:'WebGL non disponibile su questo dispositivo.'}));return;}
 const VS=`attribute vec2 p;varying vec2 t;void main(){t=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0,1);}`;
 const FS=`precision highp float;varying vec2 t;
-uniform sampler2D uBase,uUV,uMask,uTile,uBands,uOrig,uBodyA,uBodyB;uniform vec3 uFab,uZip;uniform float uCmp,uShowUV;
+uniform sampler2D uBase,uUV,uMask,uTile,uBands,uOrig,uBodyA,uBodyB;uniform vec3 uFab,uZip;uniform float uMul;uniform vec2 uTS;uniform float uCmp,uShowUV;
 const vec2 SZ=vec2(1174.,1179.);
 float d16(vec4 q){return (q.r*255.*256.+q.g*255.)/16.;}
 float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -114,9 +114,9 @@ void main(){
  // corpo: coordinate del taglio (fronte avvolto sul cilindro, testata ruotata)
  vec4 qa=texture2D(uBodyA,t),qb=texture2D(uBodyB,t);
  vec2 st=vec2(d16(qa),d16(qb));float ao=qa.b;float syn=qb.b*255./160.;
- float det=texture2D(uTile,st/160.).r;
+ float det=texture2D(uTile,st/uTS).r;
  float ps=pow(clamp(Lb/.80,0.,1.3),1.7);
- vec3 alb=uFab*(.62+.76*det);
+ vec3 alb=uMul>.5?uFab*clamp(det/.64,0.,1.35):uFab*(.62+.76*det);
  vec3 body=alb*ps*syn*.92*(1.-.5*ao);
  body+=vec3(.035)*pow(syn,5.);
  col=mix(col,body,m.g);
@@ -148,15 +148,21 @@ function setBands(spec){const tot=spec.reduce((a,b)=>a+b[1],0);let x=0;spec.forE
   gl.activeTexture(gl.TEXTURE4);if(!bandTex){bandTex=tex(4,'uBands',bandCanvas,{});}else{gl.bindTexture(gl.TEXTURE_2D,bandTex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,bandCanvas);}}
 const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);
 // i colori dei tessuti e della zip sono sRGB: lavoriamo direttamente in sRGB come in Photoshop "Moltiplica"
-let ready=false;
+let ready=false,tileKind='',tileTex=null;const IM={};
 function draw(){if(!ready)return;
+  const neo=FABRICS[st.fab][2]==='neo';
+  if(tileKind!==(neo?'neo':'dyl')){tileKind=neo?'neo':'dyl';gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,tileTex);
+   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,neo?IM.neo:IM.tile);gl.generateMipmap(gl.TEXTURE_2D);
+   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);}
+  // scala: 16 unità = 1 cm; la trama del neoprene misura 3,99 × 4,33 cm
+  gl.uniform1f(gl.getUniformLocation(pr,'uMul'),neo?1:0);gl.uniform2fv(gl.getUniformLocation(pr,'uTS'),neo?[63.8,69.3]:[160,160]);
   gl.uniform3fv(gl.getUniformLocation(pr,'uFab'),hex(FABRICS[st.fab][1]));
   gl.uniform3fv(gl.getUniformLocation(pr,'uZip'),hex(ZIPS[st.zip][1]));
   gl.uniform1f(gl.getUniformLocation(pr,'uCmp'),st.cmp?1:0);gl.uniform1f(gl.getUniformLocation(pr,'uShowUV'),st.uv?1:0);
   gl.viewport(0,0,cv.width,cv.height);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);}
 function load(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
-Promise.all(['base','uv','masks','tile','orig','ba','bb'].map(k=>load(IMG[k]))).then(([b,u,m,t,o,ba,bb])=>{
-  tex(0,'uBase',b,{});tex(1,'uUV',u,{nearest:true});tex(2,'uMask',m,{});tex(3,'uTile',t,{repeat:true});tex(5,'uOrig',o,{});tex(6,'uBodyA',ba,{nearest:true});tex(7,'uBodyB',bb,{nearest:true});
+Promise.all(['base','uv','masks','tile','orig','ba','bb','neo'].map(k=>load(IMG[k]))).then(([b,u,m,t,o,ba,bb,nn])=>{
+  IM.tile=t;IM.neo=nn;tex(0,'uBase',b,{});tex(1,'uUV',u,{nearest:true});tex(2,'uMask',m,{});tileTex=tex(3,'uTile',t,{repeat:true});tex(5,'uOrig',o,{});tex(6,'uBodyA',ba,{nearest:true});tex(7,'uBodyB',bb,{nearest:true});
   setBands(HANDLES[st.h]);ready=true;sync();});
 
 function chips(el,items,key,label,style){items.forEach((it,i)=>{const b=document.createElement('button');b.type='button';b.className='sw';b.id=key+'-'+i;
