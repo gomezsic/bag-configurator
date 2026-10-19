@@ -30,13 +30,17 @@ NEW='''<div class="wrap">
     <div class="panel cl">
       <section><h3><span class="n">1</span> Tessuto</h3><div id="cfabs"></div><div class="pick" id="cfname"></div></section>
       <section><h3><span class="n">2</span> Manico</h3><div class="hands" id="chands"></div><div class="pick" id="chname"></div></section>
+      <section><h3><span class="n">3</span> Ricamo</h3>
+        <label class="sr" for="etext">Testo del ricamo</label><input id="etext" class="txt etxt" maxlength="12" placeholder="Il tuo nome (max 12)" autocomplete="off">
+        <div class="chips" id="efonts" style="margin-top:8px"></div>
+        <div class="pick" id="ename"></div></section>
       <section class="sum"><h3>Riepilogo</h3>
         <dl>
           <dt>Modello</dt><dd>Travel Bag</dd>
           <dt>Tessuto</dt><dd id="sfab"></dd>
           <dt>Manico</dt><dd id="shand"></dd>
           <dt>Zip</dt><dd id="szip"></dd>
-          <dt>Ricamo</dt><dd class="muted">In arrivo: misure e font da ricevere</dd>
+          <dt>Ricamo</dt><dd id="semb"></dd>
           <dt>Prezzo</dt><dd class="muted">Da definire</dd>
         </dl>
         <button class="buy" type="button" disabled>Aggiungi al carrello</button>
@@ -69,9 +73,13 @@ CSS='''
 .sum dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0;font-size:.92rem}
 .sum dt{color:var(--muted)}.sum dd{margin:0;min-width:0}
 .buy{margin-top:12px;width:100%;padding:12px;border-radius:6px;border:0;background:var(--accent);color:var(--surface);font:600 1rem var(--body);opacity:.5;cursor:not-allowed}
+.etxt{width:100%;font-size:1rem;padding:9px 10px;text-transform:none}
+.ef{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:1.05rem}
+.ef[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .note{font-size:.8rem;color:var(--muted);margin-top:6px}
 '''
 one('</style>',CSS+'</style>')
+one('family=JetBrains+Mono:wght@400;500&display=swap','family=JetBrains+Mono:wght@400;500&family=Questrial&family=Cinzel:wght@500&family=Pinyon+Script&display=swap')
 one('<title>Studio QG Bags</title>','<title>Prova come cliente</title>')
 # --- dati salvati nello Studio e nell'Archivio, copiati al momento della costruzione
 one('let segs=seed0(),order=Object.keys(segs);','const SAVED='+json.dumps({'order':perc['order'],'segments':perc['segments']})+';let segs=densify(norm(JSON.parse(JSON.stringify(SAVED.segments)))),order=SAVED.order.filter(k=>segs[k]);')
@@ -104,7 +112,12 @@ function cRender(){cFabs();const f=FABRICS[st.fab],a=allowed();$('cfname').textC
   b.innerHTML='<span class="rib" style="background:'+grad(spec)+'"></span><span>Manico '+code+'<small></small></span>';b.querySelector('small').textContent=HDESC[HID[i]]||'';b.onclick=()=>{st.sample=i;cRender();};box.appendChild(b);});
  const h=a.length?SAMPLES[st.sample][0]:'';$('chname').textContent=a.length?(a.length===1?'Un solo manico per questo tessuto':a.length+' manici per questo tessuto'):'';$('shand').textContent=h?'Manico '+h:'—';
  $('szip').textContent='Decisa da QG Bags per il manico (in prova: '+ZIPS[st.zip][0].toLowerCase()+')';sync();}
-cPickHand();cRender();
+const EFONTS=[['Tw Cen','Questrial'],['Castle','Cinzel'],['Cotillion','Pinyon Script']];let efi=0;
+function eRender(){const b=$('efonts');b.innerHTML='';EFONTS.forEach(([n,g],i)=>{const e=document.createElement('button');e.type='button';e.className='ef';e.style.fontFamily='"'+g+'"';e.textContent=n;e.setAttribute('aria-pressed',i===efi);e.onclick=()=>{efi=i;eApply();};b.appendChild(e);});
+ const t=$('etext').value.trim();$('ename').textContent=t?'Colore del filo = colore della zip':'Scrivi un testo per vederlo sulla borsa';$('semb').textContent=t?'“'+t+'” · '+EFONTS[efi][0]:'Nessuno';}
+function eApply(){EMB.text=$('etext').value;EMB.font=EFONTS[efi][1];eRender();document.fonts.load('80px "'+EMB.font+'"').then(setEmb,setEmb);}
+$('etext').oninput=eApply;
+cPickHand();cRender();eRender();
 '''
 one('// ---------- avvio ----------',CL+'// ---------- avvio ----------')
 one("ready=true;sync();});","ready=true;sync();cRender();});")
