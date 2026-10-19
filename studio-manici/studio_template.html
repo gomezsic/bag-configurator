@@ -300,7 +300,7 @@ function ribbon(seg){const S=sample(seg,24);const [EL,ER]=edgeCurves(seg,24);con
  return new Float32Array(v);}
 
 // ricamo: testo disegnato nello spazio piatto del pannello davanti (stessa mappa del tessuto), così segue inclinazione e curva
-const EMB={on:false,text:'',font:'Questrial',c:[392,428],s:[240,72],tex:null};const ecv=document.createElement('canvas');ecv.width=1024;ecv.height=Math.round(1024*72/240);
+const EMB={on:false,text:'',font:'Questrial',c:[392,428],s:[175,62],tex:null};const ecv=document.createElement('canvas');ecv.width=1024;ecv.height=Math.round(1024*62/175);
 function setEmb(){const x=ecv.getContext('2d');x.clearRect(0,0,ecv.width,ecv.height);const t=(EMB.text||'').trim();EMB.on=!!t;if(t){let fs=100;x.font=fs+'px "'+EMB.font+'"';let M=x.measureText(t);const k=Math.min(ecv.width*.92/M.width,ecv.height*.8/((M.actualBoundingBoxAscent+M.actualBoundingBoxDescent)||70));fs*=k;x.font=fs+'px "'+EMB.font+'"';M=x.measureText(t);
  x.fillStyle=x.strokeStyle='#fff';x.lineJoin='round';x.lineWidth=fs*.035;x.textAlign='center';x.textBaseline='alphabetic';const y=ecv.height/2+(M.actualBoundingBoxAscent-M.actualBoundingBoxDescent)/2;x.fillText(t,ecv.width/2,y);x.strokeText(t,ecv.width/2,y);}
  if(!EMB.tex)EMB.tex=gl.createTexture();gl.activeTexture(gl.TEXTURE7);gl.bindTexture(gl.TEXTURE_2D,EMB.tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,ecv);
