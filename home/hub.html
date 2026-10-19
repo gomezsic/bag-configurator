@@ -1,0 +1,105 @@
+<title>Configuratore QG Bags</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: una colonna; in alto la barra comune, poi il percorso in 4 tappe (sequenza vera), poi cosa manca. Colori del marchio: blu navy delle fettucce, fucsia della zip. */
+:root{
+ --bg:#f4f5f9;--surface:#ffffff;--fg:#141a33;--muted:#5b6380;--line:#dfe2ec;
+ --accent:#1c2a6b;--zip:#d61f7a;--ok:#1d7a4a;--okbg:#e3f3ea;--wait:#9a5b00;--waitbg:#fbefd9;--todo:#5b6380;--todobg:#eceef4;
+ --display:"Archivo",system-ui,sans-serif;--body:"Source Sans 3",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1220;--surface:#171b2e;--fg:#e8eaf4;--muted:#a3a9c4;--line:#2a3050;--accent:#9fb0ff;--zip:#ff5fa8;--ok:#6fd39c;--okbg:#16301f;--wait:#f0b45a;--waitbg:#352812;--todo:#a3a9c4;--todobg:#222842;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1220;--surface:#171b2e;--fg:#e8eaf4;--muted:#a3a9c4;--line:#2a3050;--accent:#9fb0ff;--zip:#ff5fa8;--ok:#6fd39c;--okbg:#16301f;--wait:#f0b45a;--waitbg:#352812;--todo:#a3a9c4;--todobg:#222842;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.55 var(--body)}
+.wrap{max-width:880px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:28px}
+nav.bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font:500 .8rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+nav.bar a,nav.bar span{padding:8px 12px;border-radius:999px;text-decoration:none;color:var(--muted);border:1px solid var(--line)}
+nav.bar span.here{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+nav.bar a:hover,nav.bar a:focus-visible{color:var(--fg);border-color:var(--fg);outline:none}
+header h1{font:800 clamp(1.9rem,5vw,2.8rem)/1.05 var(--display);margin:6px 0 10px;text-wrap:balance;letter-spacing:-.01em}
+.eyebrow{font:500 .75rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--zip)}
+header p{margin:0;color:var(--muted);max-width:62ch}
+.stripe{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--accent) 0 30%,var(--zip) 30% 42%,#efe6c8 42% 58%,var(--zip) 58% 70%,var(--accent) 70%)}
+h2{font:700 1.15rem/1.2 var(--display);margin:0}
+ol.path{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:s}
+ol.path>li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;grid-template-columns:2.2rem 1fr;gap:4px 14px;counter-increment:s}
+ol.path>li::before{content:counter(s);grid-row:span 3;font:800 1.6rem/1 var(--display);color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:baseline;min-width:0}
+.row h3{font:700 1.08rem/1.2 var(--display);margin:0}
+.pill{font:500 .7rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:999px}
+.ok{background:var(--okbg);color:var(--ok)}.wait{background:var(--waitbg);color:var(--wait)}.todo{background:var(--todobg);color:var(--todo)}
+li p{margin:0;color:var(--muted);min-width:0}
+li ul{margin:4px 0 0;padding-left:18px;color:var(--fg);min-width:0}
+li ul li{margin:2px 0}
+a.go{justify-self:start;margin-top:8px;font:600 .95rem/1 var(--body);color:var(--surface);background:var(--accent);padding:10px 14px;border-radius:8px;text-decoration:none}
+a.go:hover,a.go:focus-visible{background:var(--zip);outline:none}
+section.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.todo-list{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px 20px}
+.todo-list li{padding-left:18px;position:relative}
+.todo-list li::before{content:"";position:absolute;left:0;top:.6em;width:8px;height:8px;border-radius:50%;background:var(--wait)}
+.small{font-size:.88rem;color:var(--muted)}
+code{font:500 .85em var(--mono)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+ <nav class="bar" aria-label="Pagine del configuratore">
+  <span class="here">Inizio</span>
+  <a href="https://claude.ai/artifact/Sd4DdXc8hdsXZpyQJzZmVg" target="_blank" rel="noopener">1 · Archivio</a>
+  <a href="https://claude.ai/artifact/PaVnf94enksvaffx2AuwZd" target="_blank" rel="noopener">2 · Studio</a>
+ </nav>
+
+ <header>
+  <div class="eyebrow">QG Bags · configuratore fotografico</div>
+  <h1>Configuratore QG Bags</h1>
+  <p>Il percorso di lavoro in ordine: prima si caricano i materiali, poi si prepara ogni borsa nello Studio, poi la si prova come la vedrà il cliente. Pilota: Travel Bag, vista di tre quarti.</p>
+ </header>
+ <div class="stripe" aria-hidden="true"></div>
+
+ <ol class="path">
+  <li>
+   <div class="row"><h3>Archivio</h3><span class="pill ok">In uso</span></div>
+   <p>Si caricano qui modelli, foto neutre e maschere, tessuti (scansione neutra, luce radente, colori), manici, abbinamenti, collezioni e ricamo. Ogni scheda dice cosa manca.</p>
+   <ul>
+    <li>Neoprene: trama neutra e 6 colori dal cartellino.</li>
+    <li>Tramè: trama neutra ricavata dalla foto dei campioni e 4 colori. Va sostituita con la scansione 20 × 20 cm.</li>
+    <li>Le maschere della Travel sono finite per errore sul modello City.</li>
+   </ul>
+   <a class="go" href="https://claude.ai/artifact/Sd4DdXc8hdsXZpyQJzZmVg" target="_blank" rel="noopener">Apri l'Archivio</a>
+  </li>
+  <li>
+   <div class="row"><h3>Studio</h3><span class="pill ok">In uso · Travel Bag</span></div>
+   <p>L'editor dove si vede la borsa. In alto a destra si sceglie "Manici" (percorsi delle fettucce) oppure "Verso del tessuto" (direzione e grandezza della trama per fronte, fianco e fascia sopra). Sotto si provano tessuto, zip e manico.</p>
+   <ul>
+    <li>Resa del pilota con i contorni delle maschere precise.</li>
+    <li>Ombre e cuciture prese dalla foto neutra.</li>
+    <li>Tessuti disponibili: 6 neoprene e 4 Tramè.</li>
+   </ul>
+   <a class="go" href="https://claude.ai/artifact/PaVnf94enksvaffx2AuwZd" target="_blank" rel="noopener">Apri lo Studio</a>
+  </li>
+  <li>
+   <div class="row"><h3>Prova come cliente</h3><span class="pill todo">Da costruire</span></div>
+   <p>La pagina che vedrà il cliente: sceglie la borsa, il tessuto, poi solo i manici ammessi per quel tessuto, con zip e colore del ricamo già decisi da QG Bags, e il prezzo. Si costruisce dai dati di Archivio e Studio.</p>
+  </li>
+  <li>
+   <div class="row"><h3>Database e negozio</h3><span class="pill wait">In attesa</span></div>
+   <p>Copia di tutto l'Archivio su Supabase: la struttura è pronta, manca un posto libero sul tuo account (limite di 2 progetti gratuiti attivi). Dopo: collegamento a Shopify e pubblicazione sul sito.</p>
+  </li>
+ </ol>
+
+ <section class="box">
+  <h2>Cosa serve da te per andare avanti</h2>
+  <ul class="todo-list">
+   <li>Un posto libero su Supabase, poi scrivimi</li>
+   <li>Scansioni vere dei colori di neoprene (campo "Campione reale")</li>
+   <li>Scansione del Tramè 20 × 20 cm</li>
+   <li>Livelli manici e zip della Travel</li>
+   <li>Spostare i file dal modello City alla Travel</li>
+   <li>Colore zip per ogni manico e prezzi</li>
+   <li>Misure dell'area ricamo e file dei font</li>
+   <li>Conferma: "189 gradi" vuol dire luce radente?</li>
+  </ul>
+  <p class="small">Lo stato di questa pagina lo aggiorno io a ogni passo. La guida al settaggio (PDF e Word) è nei file del progetto, cartella <code>configuratore</code>.</p>
+ </section>
+</div>
